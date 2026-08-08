@@ -276,6 +276,23 @@ npx hardhat --config hardhat.config.cjs run scripts/deploy.cjs --network coston2
 
 ---
 
+## ☁️ Cloud & Docker Deployment
+
+Aegis-F is pre-configured for multi-tier production deployment:
+
+### 1. Frontend on Vercel
+* Pre-configured with [`vercel.json`](file:///home/divyansh/Development/Projects/AGEIS-F/vercel.json) & SPA client-side routing.
+* Simply import the GitHub repo to [Vercel](https://vercel.com/new) and deploy.
+* Set `VITE_KEEPER_URL=https://your-keeper-api.onrender.com` to connect to a remote keeper daemon.
+
+### 2. Go TEE Keeper on Render / Docker
+* Multi-stage production [`Dockerfile`](file:///home/divyansh/Development/Projects/AGEIS-F/Dockerfile) and [`render.yaml`](file:///home/divyansh/Development/Projects/AGEIS-F/render.yaml) included.
+* Builds a lightweight, minimal Alpine container running the autonomous Go keeper daemon on port `6662`.
+
+---
+
+---
+
 ## 🗺️ Production Roadmap & Next Steps
 
 ### 1. FDC-Verified Cross-Chain Protection (Arbitrum Aave $\rightarrow$ Flare TEE)
