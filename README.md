@@ -2,7 +2,13 @@
 
 > **Flare Summer Signal Hackathon** — *Bounty 2: Confidential Compute Apps ($6,000 Pool)*  
 > **Target Network:** Flare Coston2 Testnet (Chain ID 114) · Flare Mainnet (Chain ID 14)  
-> **Status:** Fully Verified E2E · Smart Contracts Tested · Go TEE Keeper Compiled · Interactive React Dashboard Live
+> **Status:** Live on Coston2 Testnet · Smart Contracts Verified · Go TEE Keeper Active · Interactive Dashboard Live
+
+### 🔗 Live Coston2 Verified Smart Contracts (Chain ID 114)
+* 🏦 **`MockKineticPosition`:** [`0x6376892136f7c85E09c0e36100ffA6b484B3AC8c`](https://coston2-explorer.flare.network/address/0x6376892136f7c85E09c0e36100ffA6b484B3AC8c)
+* 📡 **`InstructionSender` (FCC Gateway):** [`0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c`](https://coston2-explorer.flare.network/address/0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c)
+* 🔐 **`AegisVault` (Confidential Reserve):** [`0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e`](https://coston2-explorer.flare.network/address/0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e)
+* 🤖 **Designated TEE Keeper:** [`0xB45f8a4946cD15bb6f208BF3372934b5946a1B38`](https://coston2-explorer.flare.network/address/0xB45f8a4946cD15bb6f208BF3372934b5946a1B38)
 
 ---
 
