@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: aegis-f-keeper
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 6662
+      - key: MODE
+        value: 0
+      - key: COSTON2_RPC
+        value: https://coston2-api.flare.network/ext/C/rpc
+      - key: POSITION_CONTRACT
+        value: "0x6376892136f7c85E09c0e36100ffA6b484B3AC8c"
+      - key: VAULT_CONTRACT
+        value: "0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e"
+      - key: SENDER_CONTRACT
+        value: "0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c"
+      - key: PRIVATE_KEY
+        sync: false

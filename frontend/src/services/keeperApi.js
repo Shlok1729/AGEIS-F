@@ -12,8 +12,8 @@
  *   POST /api/direct            → trigger registration
  */
 
-const BASE = '/api';   // Vite proxies this to http://localhost:6662
-const TIMEOUT_MS = 2000;
+const BASE = (import.meta.env.VITE_KEEPER_URL || '/api').replace(/\/$/, '');
+const TIMEOUT_MS = 3000;
 
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
