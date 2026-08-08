@@ -119,14 +119,14 @@ export default function App() {
       setMevSavings({ debtUsdAtTrigger: config.debtUsd, repaidUsd: actualRepay });
 
       addLog(`[TEE] HF threshold breached: ${healthFactor.toFixed(4)} ≤ ${config.thresholdHf.toFixed(2)}`, 'trigger');
-      addLog(`[TEE] PMW signing executeProtection() — repay $${actualRepay} USD`, 'tee');
+      addLog(`[TEE] Signing executeProtection() via enclave-isolated PMW signer — repay $${actualRepay} USD`, 'tee');
       addLog(
         `[TEE] ✅ Repayment confirmed. New debt: $${newDebt.toFixed(2)}. New HF: ${newDebt > 0 ? (liqThreshold / newDebt).toFixed(4) : '∞'}`,
         'success',
         { txHash }
       );
       addLog(`[TEE] Public liquidators saw 0 pending transactions. MEV preempted.`, 'success');
-      addLog(`[TEE] 🛡️ MEV savings: ~$${(config.debtUsd * 0.50 * 0.08).toFixed(4)} USD bonus avoided (50% close factor × 8% liq incentive)`, 'success');
+      addLog(`[TEE] 🛡️ MEV savings: ~$${(config.debtUsd * 0.50 * 0.08).toFixed(4)} USD bonus avoided (est. 50% close factor × 8% liq incentive benchmark)`, 'success');
 
       // Confetti!
       try {

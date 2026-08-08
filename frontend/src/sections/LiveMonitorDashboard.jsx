@@ -270,8 +270,8 @@ export default function LiveMonitorDashboard({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <StatusRow label="FCC Mode" value="MODE=0 (Simulation)" accent="var(--mauve)" />
               <StatusRow label="Enclave" value="tee-proxy :6662" accent="var(--mauve)" />
-              <StatusRow label="PMW Wallet" value="0x7099…79C8" accent="var(--mauve)" />
-              <StatusRow label="Reaction Time" value="~400ms" accent="var(--green)" />
+              <StatusRow label="PMW Signer" value="0x7099…79C8" accent="var(--mauve)" />
+              <StatusRow label="Reaction Time" value="Sub-second (<1.8s block)" accent="var(--green)" />
               <StatusRow label="FTSOv2 Feed" value="FLR/USD · 0x01464c…" accent="var(--blue)" />
               <StatusRow
                 label="Vault Reserve"

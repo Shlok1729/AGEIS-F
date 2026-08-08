@@ -18,16 +18,17 @@
 Aegis-F is deeply integrated with Flare's native primitives rather than relying on superficial wrappers or third-party marketplaces:
 
 1. **Flare Confidential Compute (FCC):**
-   * **TEE Extension (FCE):** Runs custom Go keeper logic (`fce-keeper/`) inside hardware-isolated enclave memory.
-   * **Protocol Managed Wallets (PMW) / Enclave Custody:** Private keys for repayment execution never leave the TEE enclave.
+   * **TEE Extension (FCE):** Runs custom Go keeper logic (`fce-keeper/`) inside hardware-isolated enclave memory (`MODE=0` simulation / `MODE=1` AMD SEV-SNP).
+   * **Protocol Managed Wallets (PMW) / Enclave Custody:** In this prototype (`MODE=0`), an enclave-isolated Go ECDSA EVM signer manages the execution wallet in process memory as a fallback, designed to integrate with native PMW threshold signing in production `MODE=1`.
    * **Instruction Routing:** `InstructionSender.sol` emits `Instruction` events with `bytes32` `OPType` and `OPCommand` pairs matching the Go daemon router.
 
 2. **Flare Time Series Oracle v2 (FTSOv2):**
-   * Block-latency (~1.8 second) price feeds querying `FtsoV2Interface.getFeedByIdInWei` for `FLR/USD` (`0x01464c522f55534400000000000000000000000000`).
+   * Block-latency (~1.8 second) price feeds querying `FtsoV2Interface.getFeedByIdInWei` for `FLR/USD` (`0x01464c522f55534400000000000000000000000000`) and 3 additional feeds (`BTC/USD`, `ETH/USD`, `XRP/USD`).
    * Provides real-time pricing without trusting centralized off-chain oracles.
 
-3. **Flare Mainnet Kinetic Compatibility:**
+3. **Kinetic Market & Compound V2 Lending Compatibility:**
    * Direct ABI-compatible interface with Kinetic Comptroller (`0xeC7e541375D70c37262f619162502dB9131d6db5`) and Unitroller (`0x8041680Fb73E1Fe5F851e76233DCDfA0f2D2D7c8`) on Flare Mainnet.
+   * `MockKineticPosition.sol` models canonical Compound-fork mechanics for demonstration, using canonical defaults (50% close factor, 8% liquidation incentive) as an illustrative benchmark for the MEV savings model.
 
 ---
 

@@ -22,9 +22,9 @@ import { motion, AnimatePresence } from 'framer-motion';
  *   net_user_loss   = mev_saving  (borrower loses this vs self-repay)
  */
 
-const CLOSE_FACTOR  = 0.50;   // Kinetic: 50% close factor (Compound V2 default)
-const LIQ_BONUS     = 0.08;   // Kinetic: 8% liquidation incentive (Compound V2 default)
-const SOURCE_NOTE   = 'est. Compound-fork defaults (Kinetic/Compound V2)';
+const CLOSE_FACTOR  = 0.50;   // Canonical Compound V2 default close factor
+const LIQ_BONUS     = 0.08;   // Canonical Compound V2 default liquidation incentive
+const SOURCE_NOTE   = 'Illustrative benchmark (canonical Compound-fork defaults)';
 
 export function computeMevSavings(debtUsd) {
   const eligibleRepay  = debtUsd * CLOSE_FACTOR;

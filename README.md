@@ -57,8 +57,8 @@ In standard DeFi lending protocols (such as Kinetic Market on Flare, Compound, o
 | **Vault Reserve Balance** | 🌐 Public | Coston2 Smart Contract | Holds user-deposited repayment collateral securely in `AegisVault.sol`. |
 | **Repayment Transaction** | 🌐 Public | Coston2 Explorer | Verifiable on-chain event confirming debt relief and restored health factor. |
 | **User Stop-Loss Threshold** | 🔒 **Confidential** | TEE Enclave Memory | Target trigger ($1.15$ HF) known only to the enclave. Invisible to MEV bots. |
-| **Health Factor Calculation** | 🔒 **Confidential** | Go FCE Daemon | Evaluated in hardware-isolated enclave every $\approx 1.8\text{s}$ oracle tick. |
-| **Keeper Signing Key (PMW)** | 🔒 **Confidential** | TEE Enclave Isolation | Enclave-custodied private key signs transactions without user key exposure. |
+| **Health Factor Calculation** | 🔒 **Confidential** | Go FCE Daemon | Evaluated in hardware-isolated enclave on each $\approx 1.8\text{s}$ oracle tick. |
+| **Keeper Signing Key (PMW)** | 🔒 **Confidential** | TEE Enclave Isolation | Enclave-custodied Go ECDSA signer (PMW fallback in MODE=0; native PMW in MODE=1). |
 
 ---
 
@@ -68,7 +68,7 @@ Aegis-F is deeply built on top of Flare's core platform capabilities:
 
 ### 1. Flare Confidential Compute (FCC) & FCE Extensions
 * **TEE Extension Daemon:** Written in Go (`fce-keeper/`), runs inside hardware enclave memory (AMD SEV-SNP in production / `MODE=0` local simulation for sandbox).
-* **Protocol Managed Wallets (PMW):** The keeper retains its own isolated signing key inside enclave memory, authorizing calls to `AegisVault.executeProtection()` without user micro-management.
+* **Protocol Managed Wallets (PMW) & Signing Fallback:** In this hackathon release (`MODE=0`), transaction signing is handled via a standard Go EVM secp256k1 ECDSA signer running isolated inside the keeper process memory (acting as the keeper's Protocol Managed Wallet fallback). In full production FCC (`MODE=1`), this integrates with Flare's native PMW threshold signing service or enclave KMS.
 * **Instruction Routing:** `InstructionSender.sol` emits typed FCC instruction events (`OPType = 0x00000001`, `OPCommand = 0x8f33a211...`) parsed by the Go daemon.
 
 ### 2. Flare Time Series Oracle v2 (FTSOv2)
@@ -79,13 +79,16 @@ Aegis-F is deeply built on top of Flare's core platform capabilities:
   * `ETH/USD`: `0x014554482f55534400000000000000000000000000`
   * `XRP/USD`: `0x015852502f55534400000000000000000000000000`
 
-### 3. Kinetic Lending Protocol Math (Compound V2 Fork)
-* Supports Kinetic Comptroller (`0xeC7e541375D70c37262f619162502dB9131d6db5`) and Unitroller (`0x8041680Fb73E1Fe5F851e76233DCDfA0f2D2D7c8`) on Flare Mainnet.
-* Accurately implements collateral factor ($80\%$), liquidation threshold ($85\%$), close factor ($50\%$), and liquidation incentive penalty ($8\%$).
+### 3. Kinetic Lending Protocol Math (Compound V2 Fork Mechanics)
+* Modeled after Kinetic Market's Comptroller and Unitroller architecture (`0xeC7e541375D70c37262f619162502dB9131d6db5` on Flare Mainnet).
+* Implements canonical Compound V2 lending dynamics in `MockKineticPosition.sol`. For demonstration and simulation benchmarks, parameters use canonical Compound-fork defaults (50% close factor, 8% liquidation incentive, 80% collateral factor, 85% liquidation threshold; live market parameters vary by asset pool).
 
 ---
 
-## 💰 Quantitative MEV Savings Model
+## 💰 Quantitative MEV Savings Model (Illustrative Compound-Fork Benchmark)
+
+> [!NOTE]
+> **Parameter Note:** Kinetic Market documentation presents risk parameters illustratively (e.g. 50% close factor), with live pool parameters varying by asset pair. The worked example below demonstrates the exact mathematical formula using canonical Compound-fork parameters (50% close factor, 8% liquidation incentive) as an illustrative benchmark.
 
 When a DeFi lending position drops below $HF = 1.00$, public liquidators seize collateral at a discount:
 
@@ -95,7 +98,7 @@ $$\text{Collateral Seized by Bot} = \text{Eligible Repay} \times (1 + \text{Liqu
 
 $$\text{Direct User MEV Loss} = \text{Eligible Repay} \times 8\%$$
 
-### Concrete Example (Standard Aegis-F Demo Position):
+### Worked Example (Standard Aegis-F Demo Benchmark):
 * **Collateral:** $1,000 \text{ FLR}$ ($=\$35.00$ at $\$0.035$)
 * **Debt:** $\$20.00 \text{ USD}$
 * **Liquidation Threshold:** $85\%$ ($\$29.75$ max borrow capacity before liquidation)
@@ -110,7 +113,7 @@ $$\text{Direct User MEV Loss} = \text{Eligible Repay} \times 8\%$$
 **Scenario 2: With Aegis-F (Confidential Enclave Protection)**
 1. Borrower registers private threshold: $HF_{thresh} = 1.15$, Auto-repay: $\$8.00 \text{ USD}$.
 2. Price drops to $\$0.027$ $\rightarrow$ Health Factor touches $\approx 1.1475 \le 1.15$.
-3. TEE Keeper fires within $400\text{ms}$, calling `AegisVault.executeProtection()`, repaying $\$8.00 \text{ USD}$ debt directly.
+3. TEE Keeper fires with sub-second execution (well within FTSOv2's $\approx 1.8\text{s}$ cadence), calling `AegisVault.executeProtection()`, repaying $\$8.00 \text{ USD}$ debt directly.
 4. Debt reduces to $\$12.00$, Collateral remains $1,000 \text{ FLR}$, new $HF = \frac{1000 \times 0.027 \times 0.85}{12} = 1.9125$ (Completely Safe).
 5. **Zero collateral lost to liquidators. MEV Front-Runners see $0$ pending liquidations.**
 
@@ -134,7 +137,7 @@ AGEIS-F/
 │   ├── ftso_poller.go                # Multi-feed FTSOv2 price poller (~1.8s tick cadence)
 │   ├── signer.go                     # PMW ECDSA signer & EVM transaction broadcaster
 │   ├── types.go                      # Enclave data structures & OPType constants
-│   └── aegis-keeper                  # Pre-compiled standalone ELF binary (10.5 MB)
+│   └── aegis-keeper                  # Standalone pre-compiled Go ELF binary
 │
 ├── frontend/                         # Catppuccin Mocha React + Vite Dashboard
 │   ├── src/
@@ -289,11 +292,12 @@ Transitioning from `MODE=0` simulation to `MODE=1` production deployment inside 
 ---
 
 ## 📄 License & Disclosures
-
+ 
 * **License:** MIT License
-* **Attestation Disclosure:** In this hackathon demonstration release, the Go keeper operates under `MODE=0` (FCC Local Enclave Simulation). All cryptographic routing, memory isolation logic, and Protocol Managed Wallet structures conform directly to Flare's FCE extension standards.
-* **Oracle Parameters:** Liquidation metrics and close factor models reference Kinetic Market's published Compound V2 protocol specifications.
+* **Attestation & PMW Disclosure:** In this hackathon demonstration release, the Go keeper operates under `MODE=0` (FCC Local Enclave Simulation), with transaction signing handled by an enclave-memory-isolated Go EVM ECDSA signer acting as the PMW fallback. In production `MODE=1`, this integrates with Flare's native PMW service and AMD SEV-SNP attestation on GCP Confidential Space.
+* **Protocol Parameters:** The MEV savings calculations and `MockKineticPosition.sol` risk parameters utilize canonical Compound V2 defaults (50% close factor, 8% liquidation incentive) as an illustrative benchmark; live Kinetic Market parameters vary across market pools.
 
 ---
 
 *Built with ❤️ for the **Flare Summer Signal Hackathon** (Confidential Compute Track).*
+
