@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"math/big"
 	"net/http"
@@ -16,6 +15,7 @@ type FtsoPoller struct {
 	positionAddr  string
 	latestPrice   *big.Int
 	lastUpdated   time.Time
+	maxStaleness  time.Duration
 	mu            sync.RWMutex
 	stopChan      chan struct{}
 	httpClient    *http.Client
@@ -27,6 +27,7 @@ func NewFtsoPoller(rpcUrl, positionAddr string) *FtsoPoller {
 		positionAddr: positionAddr,
 		latestPrice:  big.NewInt(35000000000000000), // $0.035 in Wei default
 		lastUpdated:  time.Now(),
+		maxStaleness: 120 * time.Second,             // Reject prices older than 120s
 		stopChan:     make(chan struct{}),
 		httpClient:   &http.Client{Timeout: 5 * time.Second},
 	}
@@ -67,6 +68,12 @@ func (p *FtsoPoller) GetPrice() (*big.Int, time.Time) {
 	return new(big.Int).Set(p.latestPrice), p.lastUpdated
 }
 
+func (p *FtsoPoller) IsStale() bool {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return time.Since(p.lastUpdated) > p.maxStaleness
+}
+
 func (p *FtsoPoller) SetSimulatedPrice(price *big.Int) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -80,7 +87,7 @@ func (p *FtsoPoller) fetchPrice() (*big.Int, error) {
 		return p.latestPrice, nil
 	}
 
-	// 4-byte selector for getLatestPriceView(): 0x6e2c39d7 (or fallback)
+	// 4-byte selector for getLatestPriceView(): 0x6e2c39d7
 	data := "0x6e2c39d7"
 	reqBody, _ := json.Marshal(map[string]interface{}{
 		"jsonrpc": "2.0",
@@ -113,28 +120,20 @@ func (p *FtsoPoller) fetchPrice() (*big.Int, error) {
 		} `json:"error"`
 	}
 
-	if err := json.Unmarshal(body, &jsonResp); err != nil || jsonResp.Error != nil || len(jsonResp.Result) < 66 {
-		// Fallback to internal cache if RPC is unreachable
+	if err := json.Unmarshal(body, &jsonResp); err != nil || jsonResp.Error != nil || jsonResp.Result == "" || jsonResp.Result == "0x" {
+		// Fallback to latest known price
 		return p.latestPrice, nil
 	}
 
-	// Parse the first 32 bytes (price in Wei)
-	hexVal := jsonResp.Result[2:66]
-	price := new(big.Int)
-	price.SetString(hexVal, 16)
-
-	if price.Sign() > 0 {
-		return price, nil
+	// Parse first 32 bytes as priceWei
+	hexStr := jsonResp.Result
+	if len(hexStr) >= 66 {
+		priceWei := new(big.Int)
+		priceWei.SetString(hexStr[2:66], 16)
+		if priceWei.Sign() > 0 {
+			return priceWei, nil
+		}
 	}
+
 	return p.latestPrice, nil
-}
-
-func FormatWeiToUSD(wei *big.Int) string {
-	if wei == nil {
-		return "0.000"
-	}
-	f := new(big.Float).SetInt(wei)
-	divisor := new(big.Float).SetInt(big.NewInt(1000000000000000000))
-	f.Quo(f, divisor)
-	return fmt.Sprintf("$%.4f", f)
 }

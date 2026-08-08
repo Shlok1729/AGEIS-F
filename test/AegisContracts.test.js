@@ -94,7 +94,41 @@ describe("Aegis-F Smart Contract Suite", function () {
     });
   });
 
-  describe("2. InstructionSender Confidential Compute Routing", function () {
+  describe("2. Edge Cases & Security Validations", function () {
+    it("should handle zero debt safely with max uint256 health factor", async function () {
+      await position.connect(borrower).depositCollateral({ value: DEPOSIT_COLLATERAL });
+      const hf = await position.getHealthFactorView(borrower.address);
+      expect(hf).to.equal(ethers.MaxUint256);
+    });
+
+    it("should return zero health factor if collateral is zero with active debt", async function () {
+      // Direct position simulation with debt but zero collateral
+      await position.connect(borrower).depositCollateral({ value: DEPOSIT_COLLATERAL });
+      await position.connect(borrower).borrow(BORROW_DEBT);
+      // Liquidator liquidates all collateral
+      await position.setMockPrice(ethers.parseEther("0.001"), true);
+      await position.connect(liquidator).liquidateBorrow(borrower.address);
+      const [collateralAfter, debtAfter] = await position.getPositionView(borrower.address);
+      expect(debtAfter).to.equal(0);
+      expect(collateralAfter).to.equal(0);
+    });
+
+    it("should reject borrows exceeding maximum borrowing capacity", async function () {
+      await position.connect(borrower).depositCollateral({ value: DEPOSIT_COLLATERAL });
+      // Max borrow at 80% LTV = $28.00 USD. Trying to borrow $30 should revert.
+      await expect(position.connect(borrower).borrow(ethers.parseEther("30")))
+        .to.be.revertedWith("Exceeds borrow capacity");
+    });
+
+    it("should allow owner to update maximum oracle staleness limit", async function () {
+      await expect(position.setMaxOracleStaleness(300))
+        .to.emit(position, "OracleStalenessUpdated")
+        .withArgs(180, 300);
+      expect(await position.maxOracleStaleness()).to.equal(300);
+    });
+  });
+
+  describe("3. InstructionSender Confidential Compute Routing", function () {
     it("should emit FCC instruction events with matching OPType and OPCommand", async function () {
       const thresholdWei = ethers.parseEther("1.15"); // 1.15 HF trigger
       const maxRepayWei = ethers.parseEther("10"); // $10 repay
@@ -115,9 +149,28 @@ describe("Aegis-F Smart Contract Suite", function () {
 
       await expect(tx).to.emit(instructionSender, "TriggerRegistered");
     });
+
+    it("should allow borrower to revoke an active trigger", async function () {
+      const thresholdWei = ethers.parseEther("1.15");
+      const maxRepayWei = ethers.parseEther("10");
+
+      const tx = await instructionSender.connect(borrower).registerPrivateTrigger(
+        await position.getAddress(),
+        await vault.getAddress(),
+        thresholdWei,
+        maxRepayWei
+      );
+      const receipt = await tx.wait();
+      const event = receipt.logs.find(l => instructionSender.interface.parseLog(l)?.name === "TriggerRegistered");
+      const triggerId = instructionSender.interface.parseLog(event).args.triggerId;
+
+      await expect(instructionSender.connect(borrower).revokeTrigger(triggerId))
+        .to.emit(instructionSender, "TriggerRevoked")
+        .withArgs(triggerId);
+    });
   });
 
-  describe("3. AegisVault & TEE Enclave Debt Repayment", function () {
+  describe("4. AegisVault, Circuit Breaker & TEE Debt Repayment", function () {
     it("should allow user to deposit repayment reserve and execute protection via TEE Keeper", async function () {
       // 1. Borrower deposits collateral and borrows debt on Kinetic position
       await position.connect(borrower).depositCollateral({ value: DEPOSIT_COLLATERAL });
@@ -143,8 +196,6 @@ describe("Aegis-F Smart Contract Suite", function () {
         .withArgs(borrower.address, positionAddress, repayAmount, teeKeeper.address, reserveAmount - repayAmount);
 
       // 5. Verify position health factor has recovered!
-      // New debt = $12. Collateral = 1,000 FLR @ $0.027 = $27. Liq Value = $22.95.
-      // New HF = 22.95 / 12 = 1.9125 (Healthy & completely safe from MEV liquidation!)
       const [, debtRemaining, recoveredHf, , isLiquidatable] = await position.getPositionView(borrower.address);
       expect(debtRemaining).to.equal(BORROW_DEBT - repayAmount);
       expect(recoveredHf).to.equal(ethers.parseEther("1.9125"));
@@ -162,6 +213,44 @@ describe("Aegis-F Smart Contract Suite", function () {
           ethers.parseEther("5")
         )
       ).to.be.revertedWith("Caller not authorized TEE keeper");
+    });
+
+    it("should support circuit breaker pausing to halt automated execution during emergencies", async function () {
+      const reserveAmount = ethers.parseEther("5");
+      await vault.connect(borrower).depositReserve({ value: reserveAmount });
+
+      // Owner triggers emergency pause
+      await expect(vault.connect(owner).pause())
+        .to.emit(vault, "Paused")
+        .withArgs(owner.address);
+      expect(await vault.paused()).to.be.true;
+
+      // Executions should be blocked while paused
+      await expect(
+        vault.connect(teeKeeper).executeProtection(
+          borrower.address,
+          await position.getAddress(),
+          ethers.parseEther("5")
+        )
+      ).to.be.revertedWith("Vault is paused");
+
+      // Owner unpauses
+      await expect(vault.connect(owner).unpause())
+        .to.emit(vault, "Unpaused")
+        .withArgs(owner.address);
+      expect(await vault.paused()).to.be.false;
+    });
+
+    it("should allow users to withdraw their unspent reserve", async function () {
+      const depositAmount = ethers.parseEther("5");
+      await vault.connect(borrower).depositReserve({ value: depositAmount });
+
+      const withdrawAmount = ethers.parseEther("2");
+      await expect(vault.connect(borrower).withdrawReserve(withdrawAmount))
+        .to.emit(vault, "ReserveWithdrawn")
+        .withArgs(borrower.address, withdrawAmount);
+
+      expect(await vault.getReserve(borrower.address)).to.equal(depositAmount - withdrawAmount);
     });
   });
 });

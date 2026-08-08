@@ -53,8 +53,21 @@ contract MockKineticPosition {
         }
     }
 
+    // Oracle Staleness Limit (default 180 seconds / 3 minutes)
+    uint256 public maxOracleStaleness = 180;
+    event OracleStalenessUpdated(uint256 previousLimit, uint256 newLimit);
+
     /**
-     * @notice Retrieve the latest FLR/USD price from FTSOv2 or fallback mock
+     * @notice Set maximum allowed oracle age before rejection
+     */
+    function setMaxOracleStaleness(uint256 _newLimit) external {
+        uint256 old = maxOracleStaleness;
+        maxOracleStaleness = _newLimit;
+        emit OracleStalenessUpdated(old, _newLimit);
+    }
+
+    /**
+     * @notice Retrieve the latest FLR/USD price from FTSOv2 with staleness validation
      * @return priceWei Price of 1 FLR in USD (scaled to 18 decimals)
      * @return timestamp Last price update timestamp
      */
@@ -65,6 +78,10 @@ contract MockKineticPosition {
 
         try ftsoV2.getFeedByIdInWei(FLR_USD_FEED) returns (uint256 val, uint64 ts) {
             if (val > 0) {
+                // Staleness check: reject if timestamp is older than maxOracleStaleness
+                if (block.timestamp > ts) {
+                    require(block.timestamp - ts <= maxOracleStaleness, "FTSOv2 oracle price is stale");
+                }
                 return (val, ts);
             }
         } catch {}

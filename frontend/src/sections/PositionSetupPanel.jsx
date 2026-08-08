@@ -99,9 +99,9 @@ export default function PositionSetupPanel({ config, onChange, onRegister }) {
 
           {/* Repay Amount */}
           <FieldGroup
-            label="Auto-Repay Amount"
+            label="Auto-Repay Cap"
             unit="USD"
-            hint="Per trigger execution"
+            hint="Max authorization / Dynamic buffer"
             accent="var(--green)"
           >
             <input
@@ -111,8 +111,8 @@ export default function PositionSetupPanel({ config, onChange, onRegister }) {
               step={1}
               onChange={e => onChange('repayUsd', Number(e.target.value))}
             />
-            <div style={{ fontSize: 11, color: 'var(--overlay1)', marginTop: 5 }}>
-              From AegisVault reserve
+            <div style={{ fontSize: 11, color: 'var(--green)', marginTop: 5 }}>
+              Dynamic: Restores to 1.30 HF buffer
             </div>
           </FieldGroup>
         </div>

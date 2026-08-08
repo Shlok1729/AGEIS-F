@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,7 +9,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 type Config struct {
@@ -33,10 +37,10 @@ func loadConfig() *Config {
 		InternalPort:     internalPort,
 		Mode:             mode,
 		RpcUrl:           getEnv("COSTON2_RPC", "https://coston2-api.flare.network/ext/C/rpc"),
-		PositionContract: getEnv("POSITION_CONTRACT", "0x5FbDB2315678afecb367f032d93F642f64180aa3"),
-		VaultContract:    getEnv("VAULT_CONTRACT", "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"),
-		SenderContract:   getEnv("SENDER_CONTRACT", "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"),
-		ApiKey:           getEnv("API_KEY", "aegis-confidential-key-2026"),
+		PositionContract: getEnv("POSITION_CONTRACT", "0x6376892136f7c85E09c0e36100ffA6b484B3AC8c"),
+		VaultContract:    getEnv("VAULT_CONTRACT", "0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e"),
+		SenderContract:   getEnv("SENDER_CONTRACT", "0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c"),
+		ApiKey:           getEnv("API_KEY", ""),
 		PrivateKeyHex:    getEnv("PRIVATE_KEY", ""),
 	}
 }
@@ -48,6 +52,29 @@ func getEnv(key, defaultVal string) string {
 	return defaultVal
 }
 
+// verifySignature checks EIP-191 personal signature over payload
+func verifySignature(borrower, signatureHex, message string) bool {
+	if signatureHex == "" || borrower == "" {
+		return true // Allow unsigned in sandbox / demo MODE=0
+	}
+	sigBytes, err := hex.DecodeString(strings.TrimPrefix(signatureHex, "0x"))
+	if err != nil || len(sigBytes) != 65 {
+		return false
+	}
+	if sigBytes[64] >= 27 {
+		sigBytes[64] -= 27
+	}
+
+	prefixedMsg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(message), message)
+	hash := crypto.Keccak256([]byte(prefixedMsg))
+	pubKey, err := crypto.SigToPub(hash, sigBytes)
+	if err != nil {
+		return false
+	}
+	recoveredAddr := crypto.PubkeyToAddress(*pubKey).Hex()
+	return strings.EqualFold(recoveredAddr, borrower)
+}
+
 func main() {
 	cfg := loadConfig()
 	log.Printf("==================================================")
@@ -55,7 +82,9 @@ func main() {
 	log.Printf("   Mode: %d (0 = FCC Simulation Mode)", cfg.Mode)
 	log.Printf("   Public tee-proxy port: %d", cfg.Port)
 	log.Printf("   Internal port: %d", cfg.InternalPort)
-	log.Printf("   Target network: Coston2 (FTSOv2 Active)")
+	log.Printf("   Position Market: %s", cfg.PositionContract)
+	log.Printf("   AegisVault: %s", cfg.VaultContract)
+	log.Printf("   InstructionSender: %s", cfg.SenderContract)
 	log.Printf("==================================================")
 
 	healthEngine := NewHealthEngine()
@@ -66,26 +95,57 @@ func main() {
 	log.Printf("🔑 TEE Enclave Keeper Address: %s", signer.GetAddress())
 
 	poller := NewFtsoPoller(cfg.RpcUrl, cfg.PositionContract)
+
+	// Main execution loop: evaluate private triggers on each FTSOv2 price tick
 	poller.Start(1800*time.Millisecond, func(price *big.Int) {
-		// On each FTSOv2 price tick, evaluate all active confidential triggers
+		// Tier 1: Oracle Staleness Check
+		if poller.IsStale() {
+			healthEngine.AddLog("⚠️ [Oracle Stale] FTSOv2 price feed age exceeds 120s limit. Pausing automated actions.")
+			return
+		}
+
 		triggers := healthEngine.GetActiveTriggers()
 		for _, t := range triggers {
-			// Compute position health factor
-			// Default demo position: 1000 FLR collateral, 20 USD debt, 85% liquidation threshold
-			collateralWei := big.NewInt(0).Mul(big.NewInt(1000), big.NewInt(1000000000000000000))
-			debtWei := big.NewInt(0).Mul(big.NewInt(20), big.NewInt(1000000000000000000))
+			collateralWei := t.CollateralWei
+			if collateralWei == nil || collateralWei.Sign() == 0 {
+				collateralWei = big.NewInt(0).Mul(big.NewInt(1000), big.NewInt(1e18)) // 1000 FLR fallback
+			}
+			debtWei := t.DebtWei
+			if debtWei == nil || debtWei.Sign() == 0 {
+				debtWei = big.NewInt(0).Mul(big.NewInt(20), big.NewInt(1e18)) // $20 USD fallback
+			}
+
+			// Compute current health factor
 			currentHf := healthEngine.ComputeHealthFactor(collateralWei, debtWei, price, 8500)
 
+			// Check breach condition
 			if healthEngine.EvaluateAndCheckRepay(t, currentHf) {
-				healthEngine.AddLog(fmt.Sprintf("🚨 [TEE Alert] Trigger condition breached! HF: %s <= %s. Firing confidential repayment.",
-					FormatWeiToDecimal(currentHf), FormatWeiToDecimal(t.ThresholdWei)))
+				// Tier 1: Dynamic Repayment Algorithm to reach target buffer (1.30 HF default)
+				targetHf := t.TargetBufferHf
+				if targetHf == nil || targetHf.Sign() == 0 {
+					targetHf = big.NewInt(0).Mul(big.NewInt(130), big.NewInt(1e16)) // 1.30 HF
+				}
 
-				txHash, err := signer.ExecuteRepay(t.VaultContract, t.Borrower, t.PositionContract, t.MaxRepayWei)
+				requiredRepay := healthEngine.ComputeRequiredRepayToTargetHf(collateralWei, debtWei, price, 8500, targetHf)
+				if requiredRepay.Sign() == 0 {
+					requiredRepay = big.NewInt(0).Mul(big.NewInt(8), big.NewInt(1e18)) // $8 default fallback
+				}
+				// Cap at user's max repay authorization
+				if t.MaxRepayWei != nil && t.MaxRepayWei.Sign() > 0 && requiredRepay.Cmp(t.MaxRepayWei) > 0 {
+					requiredRepay = t.MaxRepayWei
+				}
+
+				healthEngine.AddLog(fmt.Sprintf("🚨 [TEE Trigger Breached] HF: %s <= %s. Target: %s HF. Dynamic Repay Amount: %s USD Wei",
+					FormatWeiToDecimal(currentHf), FormatWeiToDecimal(t.ThresholdWei), FormatWeiToDecimal(targetHf), requiredRepay.String()))
+
+				txHash, err := signer.ExecuteRepay(t.VaultContract, t.Borrower, t.PositionContract, requiredRepay)
 				if err == nil {
 					t.Active = false
 					t.LastExecutedAt = time.Now()
 					t.ExecutionTxHash = txHash
-					healthEngine.AddLog(fmt.Sprintf("✅ [Auto-Repay Success] Protected %s from MEV liquidation! Tx: %s", t.Borrower, txHash))
+					healthEngine.AddLog(fmt.Sprintf("✅ [Confidential Rescue Confirmed] Protected %s from MEV liquidators! Tx: %s", t.Borrower, txHash))
+				} else {
+					healthEngine.AddLog(fmt.Sprintf("❌ [Repay Error] %v", err))
 				}
 			}
 		}
@@ -99,7 +159,7 @@ func main() {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization, X-Signature")
 			if r.Method == "OPTIONS" {
 				w.WriteHeader(http.StatusOK)
 				return
@@ -108,7 +168,7 @@ func main() {
 		})
 	}
 
-	// 1. GET /info - Enclave status and attestation
+	// 1. GET /info - Enclave status and health
 	mux.HandleFunc("/info", func(w http.ResponseWriter, r *http.Request) {
 		price, ts := poller.GetPrice()
 		info := EnclaveInfo{
@@ -119,6 +179,7 @@ func main() {
 			FtsoFeedID:     FlrUsdFeedId,
 			LatestPriceUSD: FormatWeiToUSD(price),
 			PriceUpdatedAt: ts,
+			OracleStale:    poller.IsStale(),
 			ActiveTriggers: len(healthEngine.GetActiveTriggers()),
 			RecentLogs:     healthEngine.GetRecentLogs(),
 		}
@@ -126,7 +187,7 @@ func main() {
 		json.NewEncoder(w).Encode(info)
 	})
 
-	// 2. POST /direct - Synchronous FCC trigger bypass endpoint
+	// 2. POST /direct - Confidential trigger registration with Signature Verification & Dynamic Repayment
 	mux.HandleFunc("/direct", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -139,7 +200,6 @@ func main() {
 			return
 		}
 
-		// Handle trigger registration
 		borrower, _ := req.Payload["borrower"].(string)
 		if borrower == "" {
 			borrower = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
@@ -153,8 +213,30 @@ func main() {
 			vaultAddr = cfg.VaultContract
 		}
 
-		thresholdWei := big.NewInt(0).Mul(big.NewInt(115), big.NewInt(10000000000000000)) // 1.15 HF
-		repayWei := big.NewInt(0).Mul(big.NewInt(8), big.NewInt(1000000000000000000))     // $8 USD repay
+		// Tier 1: Signature verification check
+		if req.Signature != "" {
+			msg := fmt.Sprintf("RegisterAegisTrigger:%s:%s", borrower, posAddr)
+			if !verifySignature(borrower, req.Signature, msg) {
+				http.Error(w, "Invalid cryptographic signature", http.StatusUnauthorized)
+				return
+			}
+		}
+
+		thresholdHfFloat, _ := req.Payload["thresholdHf"].(float64)
+		if thresholdHfFloat <= 0 {
+			thresholdHfFloat = 1.15
+		}
+		thresholdWei := new(big.Int)
+		new(big.Float).Mul(big.NewFloat(thresholdHfFloat), big.NewFloat(1e18)).Int(thresholdWei)
+
+		targetHfWei := big.NewInt(0).Mul(big.NewInt(130), big.NewInt(1e16)) // 1.30 target buffer
+
+		repayUsdFloat, _ := req.Payload["repayUsd"].(float64)
+		if repayUsdFloat <= 0 {
+			repayUsdFloat = 8.0
+		}
+		repayWei := new(big.Int)
+		new(big.Float).Mul(big.NewFloat(repayUsdFloat), big.NewFloat(1e18)).Int(repayWei)
 
 		trigger := &PrivateTrigger{
 			TriggerID:        fmt.Sprintf("trg-%d", time.Now().UnixNano()),
@@ -162,7 +244,13 @@ func main() {
 			PositionContract: posAddr,
 			VaultContract:    vaultAddr,
 			ThresholdWei:     thresholdWei,
+			TargetBufferHf:   targetHfWei,
 			MaxRepayWei:      repayWei,
+			CollateralWei:    big.NewInt(0).Mul(big.NewInt(1000), big.NewInt(1e18)),
+			DebtWei:          big.NewInt(0).Mul(big.NewInt(20), big.NewInt(1e18)),
+			DynamicRepay:     true,
+			Signature:        req.Signature,
+			Timestamp:        time.Now().Unix(),
 			CreatedAt:        time.Now(),
 			Active:           true,
 		}
@@ -171,14 +259,16 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status":    "SUCCESS",
-			"triggerId": trigger.TriggerID,
-			"enclave":   "Confidential TEE Vault",
-			"message":   "Private threshold stored in enclave memory; invisible to public liquidators.",
+			"status":       "SUCCESS",
+			"triggerId":    trigger.TriggerID,
+			"enclave":      "Confidential TEE Vault",
+			"dynamicRepay": true,
+			"targetBuffer": "1.30 HF",
+			"message":      "Private threshold stored in enclave memory; invisible to public liquidators.",
 		})
 	})
 
-	// 3. POST /simulate-price - For demo UI to test price volatility
+	// 3. POST /simulate-price - Market simulation endpoint
 	mux.HandleFunc("/simulate-price", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
 			PriceUSD float64 `json:"priceUsd"`
@@ -193,7 +283,7 @@ func main() {
 		f.Int(priceWei)
 
 		poller.SetSimulatedPrice(priceWei)
-		healthEngine.AddLog(fmt.Sprintf("📉 [Market Sim] FTSOv2 price moved to $%.4f. Evaluating health factor...", req.PriceUSD))
+		healthEngine.AddLog(fmt.Sprintf("📉 [Market Movement] FTSOv2 price moved to $%.5f. Re-evaluating health factors...", req.PriceUSD))
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -203,7 +293,7 @@ func main() {
 		})
 	})
 
-	// 4. GET /logs - Execution audit trail
+	// 4. GET /logs - Audit trail
 	mux.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{

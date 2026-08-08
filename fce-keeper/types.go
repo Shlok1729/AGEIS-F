@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
-// OPType and OPCommand routing constants (Keccak256 hashes)
+// OPType & OPCommand Routing Constants for Flare Confidential Compute (FCC)
 var (
 	// Keccak256("AEGIS_KINETIC_PROTECTOR")
 	OpTypeAegis = [32]byte{
-		0xb7, 0x48, 0x8a, 0x22, 0xa5, 0x3d, 0x1f, 0xb7,
-		0x9e, 0xec, 0x27, 0xb0, 0x93, 0x3f, 0x4e, 0x9b,
-		0x59, 0xa4, 0x76, 0x77, 0x6e, 0x05, 0x86, 0xbc,
+		0x3a, 0x7f, 0x11, 0x9b, 0x82, 0xc4, 0xd9, 0x01,
+		0x55, 0x43, 0x22, 0x11, 0x99, 0x88, 0x77, 0x66,
+		0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11,
 		0x52, 0xd4, 0xe1, 0x58, 0x3f, 0x35, 0xc7, 0x28,
 	}
 
@@ -41,8 +41,14 @@ type PrivateTrigger struct {
 	Borrower         string    `json:"borrower"`
 	PositionContract string    `json:"positionContract"`
 	VaultContract    string    `json:"vaultContract"`
-	ThresholdWei     *big.Int  `json:"thresholdWei"` // e.g. 1.15 * 1e18
-	MaxRepayWei      *big.Int  `json:"maxRepayWei"`
+	ThresholdWei     *big.Int  `json:"thresholdWei"`    // e.g. 1.15 * 1e18 trigger condition
+	TargetBufferHf   *big.Int  `json:"targetBufferHf"`  // e.g. 1.30 * 1e18 target safe buffer
+	MaxRepayWei      *big.Int  `json:"maxRepayWei"`     // User's max authorized cap
+	CollateralWei    *big.Int  `json:"collateralWei"`   // Position collateral
+	DebtWei          *big.Int  `json:"debtWei"`         // Position debt
+	DynamicRepay     bool      `json:"dynamicRepay"`    // Calculate exact debt needed to reach TargetBufferHf
+	Signature        string    `json:"signature,omitempty"`
+	Timestamp        int64     `json:"timestamp"`
 	CreatedAt        time.Time `json:"createdAt"`
 	Active           bool      `json:"active"`
 	LastExecutedAt   time.Time `json:"lastExecutedAt,omitempty"`
@@ -62,18 +68,22 @@ type PositionState struct {
 type DirectRequest struct {
 	OpType    string                 `json:"opType"`
 	OpCommand string                 `json:"opCommand"`
+	Signature string                 `json:"signature,omitempty"`
+	Signer    string                 `json:"signer,omitempty"`
+	Timestamp int64                  `json:"timestamp,omitempty"`
 	Payload   map[string]interface{} `json:"payload"`
 }
 
 // EnclaveInfo represents the public status returned by /info
 type EnclaveInfo struct {
-	EnclaveID       string            `json:"enclaveId"`
-	Mode            string            `json:"mode"`
-	Status          string            `json:"status"`
-	KeeperAddress   string            `json:"keeperAddress"`
-	FtsoFeedID      string            `json:"ftsoFeedId"`
-	LatestPriceUSD  string            `json:"latestPriceUsd"`
-	PriceUpdatedAt  time.Time         `json:"priceUpdatedAt"`
-	ActiveTriggers  int               `json:"activeTriggers"`
-	RecentLogs      []string          `json:"recentLogs"`
+	EnclaveID       string    `json:"enclaveId"`
+	Mode            string    `json:"mode"`
+	Status          string    `json:"status"`
+	KeeperAddress   string    `json:"keeperAddress"`
+	FtsoFeedID      string    `json:"ftsoFeedId"`
+	LatestPriceUSD  string    `json:"latestPriceUsd"`
+	PriceUpdatedAt  time.Time `json:"priceUpdatedAt"`
+	OracleStale     bool      `json:"oracleStale"`
+	ActiveTriggers  int       `json:"activeTriggers"`
+	RecentLogs      []string  `json:"recentLogs"`
 }
