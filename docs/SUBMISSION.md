@@ -54,9 +54,10 @@ Aegis-F is deeply integrated with Flare's native primitives rather than relying 
 * **FTSOv2 ContractRegistry:** `0xaD67FE66660Fb8dFE9d6b1b4240d8650e30F6019`
 * **FTSOv2 Direct Address:** `0x3d893c53d9e80E433582fe4091473fC49f11618F`
 * **FLR/USD Feed ID:** `0x01464c522f55534400000000000000000000000000`
-* **MockKineticPosition:** `0x5FbDB2315678afecb367f032d93F642f64180aa3`
-* **InstructionSender:** `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0`
-* **AegisVault:** `0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9`
+* **MockKineticPosition:** [`0x6376892136f7c85E09c0e36100ffA6b484B3AC8c`](https://coston2-explorer.flare.network/address/0x6376892136f7c85E09c0e36100ffA6b484B3AC8c)
+* **InstructionSender:** [`0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c`](https://coston2-explorer.flare.network/address/0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c)
+* **AegisVault:** [`0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e`](https://coston2-explorer.flare.network/address/0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e)
+* **Designated TEE Keeper:** `0xB45f8a4946cD15bb6f208BF3372934b5946a1B38`
 
 ### Flare Mainnet Reference Contracts (Chain ID 14 · Read-Only Verification)
 * **RPC Endpoint:** `https://flare-api.flare.network/ext/C/rpc`

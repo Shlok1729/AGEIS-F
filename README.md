@@ -252,29 +252,21 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser:
 
 ---
 
-## 🌐 Coston2 Testnet Deployment
+## 🌐 Coston2 Testnet Deployment & Verified Contracts
 
-To deploy the contracts to Flare Coston2 Testnet:
+Aegis-F is fully deployed and verified on **Flare Coston2 Testnet (Chain ID 114)**:
 
-1. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-2. Open `.env` and configure your funded Coston2 private key:
-   ```ini
-   COSTON2_RPC_URL=https://coston2-api.flare.network/ext/C/rpc
-   PRIVATE_KEY=0xYOUR_COSTON2_PRIVATE_KEY
-   MODE=0
-   PORT=6662
-   ```
-   *(Get free Coston2 testnet FLR at [faucet.flare.network](https://faucet.flare.network))*
+| Contract | Verified Coston2 Address | Block Explorer Link |
+| :--- | :--- | :--- |
+| **`MockKineticPosition`** | `0x6376892136f7c85E09c0e36100ffA6b484B3AC8c` | [View on Explorer ↗](https://coston2-explorer.flare.network/address/0x6376892136f7c85E09c0e36100ffA6b484B3AC8c) |
+| **`InstructionSender`** | `0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c` | [View on Explorer ↗](https://coston2-explorer.flare.network/address/0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c) |
+| **`AegisVault`** | `0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e` | [View on Explorer ↗](https://coston2-explorer.flare.network/address/0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e) |
+| **Designated TEE Keeper** | `0xB45f8a4946cD15bb6f208BF3372934b5946a1B38` | Coston2 EVM Signer |
 
-3. Run the deployment script:
-   ```bash
-   npx hardhat run scripts/deploy.cjs --network coston2
-   ```
-
-4. The deployment script will compile the contracts, deploy `MockKineticPosition`, `InstructionSender`, and `AegisVault`, verify their interfaces on Coston2, and automatically write the contract addresses to `deployments/coston2.json` and `frontend/dist/manifest.json`.
+To redeploy or deploy your own instances:
+```bash
+npx hardhat --config hardhat.config.cjs run scripts/deploy.cjs --network coston2
+```
 
 ---
 

@@ -1,0 +1,14 @@
+{
+  "network": "coston2",
+  "chainId": 114,
+  "deployedAt": "2026-08-08T22:34:09.908Z",
+  "explorerBaseUrl": "https://coston2-explorer.flare.network/address/",
+  "contracts": {
+    "MockKineticPosition": "0x6376892136f7c85E09c0e36100ffA6b484B3AC8c",
+    "InstructionSender": "0x416dbc9ABC289b58701e8543e6C54a3a7634BB3c",
+    "AegisVault": "0x52C0C06382bCF4f08689c74c47F4D5BFf36F4d6e"
+  },
+  "teeKeeper": "0xB45f8a4946cD15bb6f208BF3372934b5946a1B38",
+  "ftsoV2FeedId": "0x01464c522f55534400000000000000000000000000",
+  "ftsoV2FeedName": "FLR/USD"
+}
