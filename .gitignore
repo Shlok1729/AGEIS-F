@@ -1,0 +1,29 @@
+# Node dependencies
+node_modules/
+frontend/node_modules/
+
+# Build artifacts and caches
+artifacts/
+cache/
+typechain-types/
+dist/
+frontend/dist/
+
+# Hardhat & deployment secrets
+.env
+.env.local
+*.private.key
+
+# Go binaries and build artifacts
+fce-keeper/aegis-keeper
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE / OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
