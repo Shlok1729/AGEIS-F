@@ -87,3 +87,17 @@ type EnclaveInfo struct {
 	ActiveTriggers  int       `json:"activeTriggers"`
 	RecentLogs      []string  `json:"recentLogs"`
 }
+
+// ProtocolStats represents public aggregate metrics returned by /stats
+type ProtocolStats struct {
+	TotalValueProtectedUSD float64   `json:"totalValueProtectedUsd"`
+	TotalMevSavedUSD       float64   `json:"totalMevSavedUsd"`
+	ActiveTriggers         int       `json:"activeTriggers"`
+	TotalPositionsMonitored int      `json:"totalPositionsMonitored"`
+	SuccessfulRescues      int       `json:"successfulRescues"`
+	AvgExecutionLatencyMs  int       `json:"avgExecutionLatencyMs"`
+	UptimeSeconds          int64     `json:"uptimeSeconds"`
+	GasCostPerRescueUSD    float64   `json:"gasCostPerRescueUsd"`
+	Timestamp              time.Time `json:"timestamp"`
+}
+

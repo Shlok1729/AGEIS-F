@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -75,6 +76,47 @@ func verifySignature(borrower, signatureHex, message string) bool {
 	return strings.EqualFold(recoveredAddr, borrower)
 }
 
+// RateLimiter tracks requests per key (signer or client IP)
+type RateLimiter struct {
+	mu       sync.Mutex
+	requests map[string][]time.Time
+	limit    int
+	window   time.Duration
+}
+
+func NewRateLimiter(limit int, window time.Duration) *RateLimiter {
+	return &RateLimiter{
+		requests: make(map[string][]time.Time),
+		limit:    limit,
+		window:   window,
+	}
+}
+
+func (rl *RateLimiter) Allow(key string) bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
+	now := time.Now()
+	cutoff := now.Add(-rl.window)
+
+	times := rl.requests[key]
+	valid := make([]time.Time, 0, len(times))
+	for _, t := range times {
+		if t.After(cutoff) {
+			valid = append(valid, t)
+		}
+	}
+
+	if len(valid) >= rl.limit {
+		rl.requests[key] = valid
+		return false
+	}
+
+	valid = append(valid, now)
+	rl.requests[key] = valid
+	return true
+}
+
 func main() {
 	cfg := loadConfig()
 	log.Printf("==================================================")
@@ -88,6 +130,8 @@ func main() {
 	log.Printf("==================================================")
 
 	healthEngine := NewHealthEngine()
+	rateLimiter := NewRateLimiter(10, 1*time.Minute) // 10 requests per minute limit
+
 	signer, err := NewEvmSigner(cfg.PrivateKeyHex, cfg.RpcUrl, cfg.Mode == 0)
 	if err != nil {
 		log.Fatalf("Failed to initialize EVM Signer: %v", err)
@@ -143,6 +187,16 @@ func main() {
 					t.Active = false
 					t.LastExecutedAt = time.Now()
 					t.ExecutionTxHash = txHash
+
+					// Record aggregate stats
+					collatF, _ := new(big.Float).SetInt(collateralWei).Float64()
+					priceF, _ := new(big.Float).SetInt(price).Float64()
+					collatUsd := (collatF / 1e18) * (priceF / 1e18)
+					debtF, _ := new(big.Float).SetInt(debtWei).Float64()
+					debtUsd := debtF / 1e18
+					mevSaved := debtUsd * 0.50 * 0.08 // 50% close factor * 8% liq incentive
+
+					healthEngine.RecordRescue(collatUsd, mevSaved)
 					healthEngine.AddLog(fmt.Sprintf("✅ [Confidential Rescue Confirmed] Protected %s from MEV liquidators! Tx: %s", t.Borrower, txHash))
 				} else {
 					healthEngine.AddLog(fmt.Sprintf("❌ [Repay Error] %v", err))
@@ -153,20 +207,6 @@ func main() {
 
 	// Setup HTTP Handlers
 	mux := http.NewServeMux()
-
-	// CORS middleware
-	corsMiddleware := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization, X-Signature")
-			if r.Method == "OPTIONS" {
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-			next.ServeHTTP(w, r)
-		})
-	}
 
 	// 1. GET /info - Enclave status and health
 	mux.HandleFunc("/info", func(w http.ResponseWriter, r *http.Request) {
@@ -187,7 +227,7 @@ func main() {
 		json.NewEncoder(w).Encode(info)
 	})
 
-	// 2. POST /direct - Confidential trigger registration with Signature Verification & Dynamic Repayment
+	// 2. POST /direct - Confidential trigger registration with Signature Verification, Rate Limiting & Dynamic Repayment
 	mux.HandleFunc("/direct", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -211,6 +251,26 @@ func main() {
 		vaultAddr, _ := req.Payload["vaultContract"].(string)
 		if vaultAddr == "" {
 			vaultAddr = cfg.VaultContract
+		}
+
+		// Tier 2: Rate Limiting by signer address / client IP
+		rateKey := req.Signer
+		if rateKey == "" {
+			rateKey = borrower
+		}
+		if rateKey == "" {
+			rateKey = r.RemoteAddr
+		}
+		if !rateLimiter.Allow(rateKey) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Retry-After", "60")
+			w.WriteHeader(http.StatusTooManyRequests)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"error":   "Rate limit exceeded. Maximum 10 trigger registrations per minute per signer.",
+				"status":  429,
+				"retryIn": "60s",
+			})
+			return
 		}
 
 		// Tier 1: Signature verification check
@@ -301,9 +361,28 @@ func main() {
 		})
 	})
 
+	// 5. GET /stats - Public Aggregate Metrics & Track Record
+	mux.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
+		stats := healthEngine.GetStats()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(stats)
+	})
+
+	// Wrap mux with CORS
+	corsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization, X-Signature")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		mux.ServeHTTP(w, r)
+	})
+
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
-		Handler: corsMiddleware(mux),
+		Handler: corsHandler,
 	}
 
 	log.Printf("🚀 TEE Proxy listening on http://localhost:%d", cfg.Port)
@@ -311,3 +390,4 @@ func main() {
 		log.Printf("Server stopped: %v", err)
 	}
 }
+

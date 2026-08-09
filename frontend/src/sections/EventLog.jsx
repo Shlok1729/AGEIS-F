@@ -1,142 +1,151 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Terminal, ExternalLink, ShieldCheck, Activity } from 'lucide-react';
 import MevSavingsCard from '../components/MevSavingsCard';
 
-/**
- * EventLog – Section 4
- * Terminal-style scrolling log of all events. The "payoff" panel.
- * Auto-scroll is scoped to the container div only — does NOT scroll the page.
- *
- * Priority 2 integration: MevSavingsCard appears below the log the moment
- * the TEE trigger fires — it's the visual payoff of the demo.
- *
- * Priority 3 (TEE attestation): Documented gap below — not faked.
- */
-export default function EventLog({ logs, mevSavings }) {
+export default function EventLog({ logs = [], mevSavings, onReset, onBackToMonitor }) {
   const containerRef = useRef(null);
 
-  // Scroll only the log container, not the whole page
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [logs.length]);
 
-  const hasTriggered = mevSavings != null;
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.05 }}
-      className="panel"
-      style={{ marginBottom: 24, border: '1px solid var(--border-surface)' }}
+      transition={{ duration: 0.3 }}
+      style={{ marginBottom: 24 }}
     >
-      <div className="panel-titlebar">
-        <span className="dot" style={{ background: 'var(--green)' }} />
-        <span>Execution Log</span>
-        <span style={{ flex: 1 }} />
-
-        {/* Priority 3: TEE Attestation — documented gap, not faked */}
-        <span
-          title="Attestation: In FCC production deployments, AMD SEV-SNP attestation records are published on-chain via GCP Confidential Space. In this demo (MODE=0), full hardware attestation is not active — labeled accurately as simulated."
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            fontSize: 10,
-            color: 'var(--overlay0)',
-            cursor: 'help',
-            borderBottom: '1px dashed var(--surface2)',
-            paddingBottom: 1,
-            marginRight: 12,
-          }}
-        >
-          🔍 TEE Attestation: MODE=0 (simulated — hover for production note)
-        </span>
-
-        <span style={{ color: 'var(--overlay0)', fontSize: 10 }}>
-          {logs.length} events ·{' '}
-          <span
-            className="cursor"
-            style={{
-              display: 'inline-block', width: 6, height: 10,
-              background: 'var(--green)',
-              animation: 'blink 1.1s step-end infinite',
-              verticalAlign: 'middle', marginLeft: 2,
-            }}
-          />
-        </span>
-      </div>
-
-      <div
-        style={{
-          padding: '14px 18px',
-          background: 'var(--crust)',
-          minHeight: 200,
-          maxHeight: 280,
-          overflowY: 'auto',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 12,
-        }}
-        ref={containerRef}
-      >
-        <AnimatePresence initial={false}>
-          {logs.map((log) => (
-            <motion.div
-              key={log.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-              className={`terminal-line terminal-line--${log.type}`}
-            >
-              <span style={{ color: 'var(--surface2)', marginRight: 10, userSelect: 'none' }}>
-                [{log.time}]
-              </span>
-              <span style={{ color: 'var(--overlay1)', marginRight: 8, userSelect: 'none' }}>
-                {log.prefix || '>'}
-              </span>
-              <span>{log.text}</span>
-              {log.txHash && (
-                <a
-                  href={`https://coston2-explorer.flare.network/tx/${log.txHash}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ marginLeft: 10, color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}
-                  title="View on Coston2 explorer (simulated tx in demo)"
-                >
-                  tx: {log.txHash.slice(0, 18)}… ↗
-                </a>
-              )}
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        {logs.length === 0 && (
-          <div style={{ color: 'var(--surface2)', padding: '20px 0', textAlign: 'center' }}>
-            Waiting for events…
-            <span
-              className="cursor"
-              style={{
-                display: 'inline-block', width: 7, height: 13,
-                background: 'var(--surface2)',
-                animation: 'blink 1.1s step-end infinite',
-                verticalAlign: 'middle', marginLeft: 3,
-              }}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* ── Priority 2: MEV Savings Card — appears the moment trigger fires ── */}
+      {/* Payoff Card if triggered */}
       {mevSavings && (
-        <div style={{ padding: '0 16px 16px' }}>
+        <div style={{ marginBottom: 20 }}>
           <MevSavingsCard
             debtUsdAtTrigger={mevSavings.debtUsdAtTrigger}
             repaidUsd={mevSavings.repaidUsd}
-            visible={hasTriggered}
+            visible={true}
           />
         </div>
       )}
+
+      {/* Terminal Log Panel with 3-dot window chrome */}
+      <div className="terminal-window">
+        <div className="terminal-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="terminal-dots">
+              <span className="terminal-dot terminal-dot--red" />
+              <span className="terminal-dot terminal-dot--yellow" />
+              <span className="terminal-dot terminal-dot--green" />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Terminal size={13} style={{ color: 'var(--tech-purple)' }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-sans)' }}>
+                Enclave Execution & Settlement Audit Trail
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span className="badge badge--purple" style={{ fontSize: 9 }}>
+              FCC MODE=0 (Simulated Enclave)
+            </span>
+            <span style={{ color: 'var(--text-muted)', fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+              {logs.length} events
+            </span>
+          </div>
+        </div>
+
+        <div
+          ref={containerRef}
+          style={{
+            padding: '18px 20px',
+            background: '#09090E',
+            minHeight: 220,
+            maxHeight: 340,
+            overflowY: 'auto',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12,
+            lineHeight: 1.6,
+          }}
+        >
+          <AnimatePresence initial={false}>
+            {logs.map((log) => {
+              let textColor = 'var(--text-secondary)';
+              if (log.type === 'trigger' || log.type === 'warn') textColor = 'var(--risk-red)';
+              else if (log.type === 'success' || log.type === 'check') textColor = 'var(--money-green)';
+              else if (log.type === 'tee') textColor = 'var(--tech-purple)';
+              else if (log.type === 'price') textColor = 'var(--flare-blue)';
+
+              return (
+                <motion.div
+                  key={log.id}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.15 }}
+                  style={{ marginBottom: 6, display: 'flex', alignItems: 'flex-start', flexWrap: 'wrap', gap: 6 }}
+                >
+                  <span style={{ color: 'var(--text-muted)', userSelect: 'none' }}>
+                    [{log.time}]
+                  </span>
+                  <span style={{ color: 'var(--tech-purple)', userSelect: 'none', fontWeight: 600 }}>
+                    {log.prefix || '>'}
+                  </span>
+                  <span style={{ color: textColor }}>{log.text}</span>
+                  {log.txHash && (
+                    <a
+                      href={`https://coston2-explorer.flare.network/tx/${log.txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn--surface"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        padding: '1px 7px',
+                        fontSize: 10,
+                        fontFamily: 'var(--font-mono)',
+                        color: 'var(--flare-blue)',
+                        textDecoration: 'none',
+                        marginLeft: 6,
+                      }}
+                      title="View transaction on Flare Coston2 explorer"
+                    >
+                      <span>tx: {log.txHash.slice(0, 14)}…</span>
+                      <ExternalLink size={10} />
+                    </a>
+                  )}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Navigation Actions */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
+        {onBackToMonitor && (
+          <button
+            type="button"
+            className="btn btn--surface"
+            onClick={onBackToMonitor}
+            style={{ fontSize: 12 }}
+          >
+            <span>Return to monitor</span>
+          </button>
+        )}
+        {onReset && (
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={onReset}
+            style={{ fontSize: 12, marginLeft: 'auto' }}
+          >
+            <span>Run another simulation</span>
+          </button>
+        )}
+      </div>
     </motion.div>
   );
 }

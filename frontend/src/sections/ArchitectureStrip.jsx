@@ -1,54 +1,48 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { User, Layers, Lock, Radio, CheckCircle2, ArrowRight } from 'lucide-react';
 
 const STEPS = [
   {
     id: 'user',
-    label: 'User',
-    sub: 'Sets private\nHF threshold',
-    accent: 'var(--mauve)',
-    icon: '👤',
+    label: 'Borrower',
+    sub: 'EIP-191 private trigger authorization',
+    accent: 'var(--tech-purple)',
+    icon: User,
     private: true,
   },
   {
     id: 'vault',
     label: 'AegisVault',
-    sub: 'Coston2 smart\ncontract',
-    accent: 'var(--blue)',
-    icon: '🏦',
+    sub: 'Coston2 non-custodial reserve',
+    accent: 'var(--flare-blue)',
+    icon: Layers,
     private: false,
   },
   {
     id: 'tee',
-    label: 'TEE Enclave',
-    sub: 'FCC extension\nMODE=0',
-    accent: 'var(--mauve)',
-    icon: '🔐',
+    label: 'FCC TEE Enclave',
+    sub: 'Encrypted RAM health engine',
+    accent: 'var(--tech-purple)',
+    icon: Lock,
     private: true,
   },
   {
     id: 'ftso',
-    label: 'FTSOv2',
-    sub: 'Block-latency\nprice feed',
-    accent: 'var(--blue)',
-    icon: '📡',
+    label: 'FTSOv2 Streamer',
+    sub: 'Sub-second decentralized oracle',
+    accent: 'var(--flare-blue)',
+    icon: Radio,
     private: false,
   },
   {
     id: 'repay',
-    label: 'Repayment TX',
-    sub: 'Verifiable\non-chain',
-    accent: 'var(--green)',
-    icon: '✅',
+    label: 'Dynamic Repayment',
+    sub: 'Preempts MEV liquidators',
+    accent: 'var(--money-green)',
+    icon: CheckCircle2,
     private: false,
   },
-];
-
-const ARROWS = [
-  { label: 'FCC Instruction', private: true },
-  { label: 'Trigger config', private: true },
-  { label: 'Reads price', private: false },
-  { label: 'executeProtection()', private: false },
 ];
 
 export default function ArchitectureStrip() {
@@ -56,126 +50,103 @@ export default function ArchitectureStrip() {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.1 }}
-      className="panel"
-      style={{ marginBottom: 24 }}
+      transition={{ duration: 0.4 }}
+      className="fintech-card"
+      style={{
+        padding: '24px 28px',
+        marginBottom: 24,
+        background: 'rgba(18, 18, 26, 0.65)',
+      }}
     >
-      <div className="panel-titlebar">
-        <span className="dot" style={{ background: 'var(--blue)' }} />
-        <span>Architecture</span>
-        <span style={{ flex: 1 }} />
-        <span style={{ fontSize: 10, color: 'var(--overlay0)' }}>
-          <span style={{ color: 'var(--mauve)', marginRight: 12 }}>█ private / TEE</span>
-          <span style={{ color: 'var(--blue)' }}>█ public / on-chain</span>
-        </span>
+      {/* Titlebar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="badge badge--purple" style={{ fontSize: 10 }}>
+            Confidential Architecture
+          </span>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+            End-to-End TEE Data Pipeline
+          </h3>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 11 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--tech-purple)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--tech-purple)', display: 'inline-block' }} />
+            Private TEE Enclave Domain
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--flare-blue)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--flare-blue)', display: 'inline-block' }} />
+            Public Flare On-Chain Domain
+          </span>
+        </div>
       </div>
 
-      <div style={{ padding: '20px 28px' }}>
-        {/* Flow row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-          {STEPS.map((step, i) => (
-            <React.Fragment key={step.id}>
-              {/* Node */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flex: '0 0 auto', minWidth: 90 }}>
-                <div style={{
-                  width: 52,
-                  height: 52,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: `2px solid ${step.accent}`,
-                  borderRadius: 4,
-                  background: step.private
-                    ? 'rgba(203,166,247,0.08)'
-                    : 'rgba(137,180,250,0.06)',
-                  fontSize: 22,
-                  boxShadow: `0 0 16px ${step.accent}33`,
-                  position: 'relative',
-                }}>
-                  {step.icon}
-                  {step.private && (
-                    <div style={{
-                      position: 'absolute',
-                      top: -6, right: -6,
-                      fontSize: 10,
-                      background: 'var(--mantle)',
-                      borderRadius: 2,
-                      padding: '0 3px',
-                      color: 'var(--mauve)',
-                      fontWeight: 700,
-                      border: '1px solid rgba(203,166,247,0.3)',
-                    }}>
-                      TEE
-                    </div>
-                  )}
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: step.accent }}>{step.label}</div>
-                  <div style={{ fontSize: 10, color: 'var(--overlay1)', marginTop: 2, lineHeight: 1.4, whiteSpace: 'pre-line' }}>
-                    {step.sub}
-                  </div>
-                </div>
+      {/* Pipeline Steps Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: 16,
+        position: 'relative',
+      }}>
+        {STEPS.map((step, i) => {
+          const IconComp = step.icon;
+          return (
+            <div
+              key={step.id}
+              style={{
+                background: step.private ? 'rgba(155, 127, 255, 0.04)' : 'rgba(255, 255, 255, 0.02)',
+                border: `1px solid ${step.private ? 'rgba(155, 127, 255, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
+                borderRadius: '14px',
+                padding: '18px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                position: 'relative',
+              }}
+            >
+              {/* Step Icon Badge */}
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: '10px',
+                background: step.private ? 'rgba(155, 127, 255, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                border: `1px solid ${step.accent}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 12,
+                color: step.accent,
+                boxShadow: `0 0 16px ${step.accent}22`,
+              }}>
+                <IconComp size={20} />
               </div>
 
-              {/* Arrow between nodes */}
+              {/* Step Content */}
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+                {step.label}
+              </span>
+              <span style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                {step.sub}
+              </span>
+
+              {/* Flow arrow between steps */}
               {i < STEPS.length - 1 && (
                 <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 4,
-                  padding: '0 4px',
-                  paddingBottom: 28, // offset for label below
+                  position: 'absolute',
+                  right: -12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 2,
+                  color: 'var(--text-muted)',
+                  display: 'none', // Shown on large desktop or subtle
                 }}>
-                  <div style={{
-                    width: '100%',
-                    height: 1,
-                    background: ARROWS[i].private
-                      ? `repeating-linear-gradient(90deg, var(--mauve) 0, var(--mauve) 6px, transparent 6px, transparent 10px)`
-                      : 'var(--surface1)',
-                  }} />
-                  <div style={{
-                    fontSize: 9,
-                    color: ARROWS[i].private ? 'var(--mauve)' : 'var(--overlay0)',
-                    letterSpacing: '0.06em',
-                    textAlign: 'center',
-                    textTransform: 'uppercase',
-                  }}>
-                    {ARROWS[i].label}
-                  </div>
+                  <ArrowRight size={14} />
                 </div>
               )}
-            </React.Fragment>
-          ))}
-        </div>
-
-        {/* Legend bar */}
-        <div style={{
-          marginTop: 20,
-          padding: '10px 14px',
-          background: 'var(--mantle)',
-          border: '1px solid var(--border-dim)',
-          borderRadius: 2,
-          display: 'flex',
-          gap: 32,
-          fontSize: 11,
-          color: 'var(--overlay1)',
-          flexWrap: 'wrap',
-        }}>
-          <span>
-            <span style={{ color: 'var(--mauve)', fontWeight: 700 }}>── ── TEE-encrypted</span>
-            {' '}— Threshold and HF never leave enclave memory
-          </span>
-          <span>
-            <span style={{ color: 'var(--blue)', fontWeight: 700 }}>────── On-chain</span>
-            {' '}— FTSOv2 price feed verifiable by anyone
-          </span>
-          <span>
-            <span style={{ color: 'var(--green)', fontWeight: 700 }}>✅ Repayment</span>
-            {' '}— Verifiable on Coston2 block explorer
-          </span>
-        </div>
+            </div>
+          );
+        })}
       </div>
     </motion.div>
   );

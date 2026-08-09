@@ -1,36 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
+import { Activity, ShieldAlert, ShieldCheck, Lock, ArrowDownRight, RefreshCw, Zap, TrendingDown, Eye, EyeOff } from 'lucide-react';
 import CountUp from '../components/CountUp';
 import FeedStrip from '../components/FeedStrip';
 
-/**
- * LiveMonitorDashboard – Section 3
- * The centrepiece: live FTSOv2 price, TEE-view of HF, status + threshold bar.
- */
 export default function LiveMonitorDashboard({
-  flrPrice,
-  healthFactor,
-  thresholdHf,
-  collateralFlr,
-  debtUsd,
-  vaultReserveUsd,
-  teeArmed,
-  lastTick,
+  flrPrice = 0.035,
+  config = {},
+  teeArmed = true,
+  vaultReserveUsd = 10,
+  mevSavings = null,
   onSimulateDrop,
   onReset,
+  lastTick,
 }) {
-  const [teeView, setTeeView] = useState(true); // toggle TEE view
+  const { collateralFlr = 1000, debtUsd = 20, thresholdHf = 1.15, repayUsd = 8 } = config;
+  const [teeView, setTeeView] = useState(true);
 
   const priceRef = useRef(null);
   const hfRef    = useRef(null);
+
+  const collateralUsd  = collateralFlr * flrPrice;
+  const liqThreshold   = collateralUsd * 0.85;
+  const healthFactor   = debtUsd > 0 ? liqThreshold / debtUsd : Infinity;
+  const isLiquidatable = healthFactor < 1.0 && debtUsd > 0;
+  const isTeeZone      = healthFactor <= thresholdHf && debtUsd > 0;
 
   // Pulse price display on tick
   useEffect(() => {
     if (!priceRef.current) return;
     gsap.fromTo(priceRef.current,
-      { color: '#89b4fa', scale: 1.06 },
-      { color: '#cdd6f4', scale: 1, duration: 0.45, ease: 'power2.out' }
+      { color: 'var(--tech-purple)', scale: 1.03 },
+      { color: 'var(--text-primary)', scale: 1, duration: 0.4, ease: 'power2.out' }
     );
   }, [flrPrice]);
 
@@ -38,283 +40,277 @@ export default function LiveMonitorDashboard({
   useEffect(() => {
     if (!hfRef.current) return;
     gsap.fromTo(hfRef.current,
-      { scale: 1.04 },
+      { scale: 1.03 },
       { scale: 1, duration: 0.35, ease: 'power2.out' }
     );
   }, [healthFactor]);
 
-  const collateralUsd    = collateralFlr * flrPrice;
-  const liqThresholdUsd  = collateralUsd * 0.85;
-  const isLiquidatable   = healthFactor < 1.0 && debtUsd > 0;
-  const isTeeZone        = healthFactor <= thresholdHf && debtUsd > 0;
-
-  // Derive status
-  let status, statusClass, statusIcon;
-  if (isLiquidatable)    { status = 'LIQUIDATABLE';  statusClass = 'badge--red';   statusIcon = '🔴'; }
-  else if (isTeeZone)    { status = 'TEE TRIGGERED'; statusClass = 'badge--peach'; statusIcon = '🟠'; }
-  else if (healthFactor < 1.5) { status = 'AT RISK'; statusClass = 'badge--peach'; statusIcon = '🟡'; }
-  else                   { status = 'HEALTHY';       statusClass = 'badge--green'; statusIcon = '🟢'; }
+  // Status badge derivation
+  let statusText = 'Healthy & Protected';
+  let statusColor = 'var(--money-green)';
+  if (isLiquidatable) {
+    statusText = 'Liquidatable (MEV Hunt Active)';
+    statusColor = 'var(--risk-red)';
+  } else if (isTeeZone) {
+    statusText = 'TEE Trigger Firing';
+    statusColor = 'var(--risk-red)';
+  } else if (healthFactor < 1.30) {
+    statusText = 'Approaching Trigger Threshold';
+    statusColor = 'var(--flare-blue)';
+  }
 
   const hfBarWidth    = Math.min(100, Math.max(0, (healthFactor / 2.5) * 100));
   const threshBarLeft = Math.min(100, (thresholdHf / 2.5) * 100);
-  const hfColor       = isLiquidatable ? 'var(--red)' : isTeeZone ? 'var(--peach)' : healthFactor < 1.5 ? 'var(--yellow)' : 'var(--green)';
-
-  const secondsAgo = lastTick ? Math.round((Date.now() - lastTick) / 1000) : null;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.3 }}
       style={{ marginBottom: 24 }}
     >
-      {/* ── Priority 1: Multi-feed FTSOv2 strip ── */}
+      {/* Oracle Feed Strip */}
       <FeedStrip flrPriceOverride={flrPrice} lastTick={lastTick} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+      {/* 3-Column Monitor Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1.15fr 1fr',
+        gap: 20,
+        marginTop: 20,
+      }}>
 
-        {/* ── Price Feed Panel (PUBLIC) ── */}
-        <div className="panel" style={{ background: 'rgba(137, 180, 250, 0.04)', border: '1px solid rgba(137,180,250,0.2)' }}>
-          <div className="panel-titlebar">
-            <span className="dot" style={{ background: 'var(--blue)' }} />
-            <span style={{ color: 'var(--blue)' }}>FTSOv2 Price Feed</span>
-            <span style={{ flex: 1 }} />
-            <span className="badge badge--blue">PUBLIC / ON-CHAIN</span>
+        {/* Column 1: Public Oracle & Market Simulator */}
+        <div className="fintech-card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+              Public Oracle Feed
+            </span>
+            <span className="badge badge--neutral" style={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}>
+              FLR/USD (~1.8s)
+            </span>
           </div>
-          <div style={{ padding: '18px 20px' }}>
-            <div style={{ fontSize: 10, color: 'var(--overlay1)', marginBottom: 6, letterSpacing: '0.08em' }}>
-              FEED: FLR/USD · COSTON2
-            </div>
-            <div ref={priceRef} style={{
+
+          <span style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+            FTSOv2 Coston2 Feed
+          </span>
+          <div
+            ref={priceRef}
+            style={{
               fontFamily: 'var(--font-mono)',
               fontSize: 34,
               fontWeight: 800,
-              color: 'var(--text)',
+              color: 'var(--text-primary)',
               letterSpacing: '-0.02em',
-              marginBottom: 6,
+              marginBottom: 4,
               display: 'flex',
               alignItems: 'baseline',
-              gap: 4,
-            }}>
-              <span style={{ fontSize: 18, color: 'var(--overlay1)' }}>$</span>
-              <CountUp to={flrPrice} decimals={5} />
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--overlay1)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span
-                className="pulse"
-                style={{
-                  display: 'inline-block', width: 6, height: 6,
-                  borderRadius: '50%', background: 'var(--blue)',
-                  color: 'var(--blue)',
-                }}
-              />
-              <span>Last tick: {secondsAgo !== null ? `${secondsAgo}s ago` : '—'} · ~1.8s cadence</span>
-            </div>
-
-            {/* Price Slider for simulation */}
-            <div style={{ marginTop: 20 }}>
-              <div style={{ fontSize: 10, color: 'var(--overlay0)', marginBottom: 8, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                Simulate Price
-              </div>
-              <input
-                type="range"
-                min="0.010"
-                max="0.050"
-                step="0.001"
-                value={flrPrice}
-                onChange={e => onSimulateDrop(Number(e.target.value))}
-                style={{ marginBottom: 8 }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--overlay0)' }}>
-                <span style={{ color: 'var(--red)' }}>$0.010 crash</span>
-                <span style={{ color: 'var(--green)' }}>$0.050 safe</span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
-              <button className="btn btn--red" style={{ flex: 1, fontSize: 11 }} onClick={() => onSimulateDrop(0.027)}>
-                Drop → $0.027 (TEE fires)
-              </button>
-              <button className="btn btn--surface" style={{ fontSize: 11 }} onClick={onReset} title="Reset">
-                ↺
-              </button>
-            </div>
+              gap: 2,
+            }}
+          >
+            <span style={{ fontSize: 20, color: 'var(--text-muted)' }}>$</span>
+            <CountUp to={flrPrice} decimals={5} />
           </div>
-        </div>
 
-        {/* ── Health Factor Panel (TEE VIEW) ── */}
-        <div
-          className={`panel ${isLiquidatable ? 'panel--red' : isTeeZone ? 'panel--peach' : 'panel--mauve'}`}
-          style={{ background: 'rgba(203,166,247,0.04)' }}
-        >
-          <div className="panel-titlebar">
-            <span className="dot" style={{ background: 'var(--mauve)' }} />
-            <span style={{ color: 'var(--mauve)' }}>Health Factor</span>
-            <span style={{ flex: 1 }} />
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 24 }}>
+            Sub-second tick ingestion into hardware enclave
+          </span>
+
+          {/* Price Simulator Controls */}
+          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: 18 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 600 }}>
+              <span>Simulate Market Move</span>
+              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--flare-blue)' }}>${flrPrice.toFixed(5)}</span>
+            </div>
+            <input
+              type="range"
+              min="0.010"
+              max="0.050"
+              step="0.001"
+              value={flrPrice}
+              onChange={e => onSimulateDrop(Number(e.target.value))}
+              style={{ width: '100%', marginBottom: 12 }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)', marginBottom: 16 }}>
+              <span>$0.010 Crash</span>
+              <span>$0.050 Safe</span>
+            </div>
+
             <button
-              onClick={() => setTeeView(v => !v)}
-              className="badge badge--mauve"
-              style={{ cursor: 'pointer', border: 'none', padding: '2px 8px' }}
-              title="Toggle TEE view"
+              type="button"
+              className="btn btn--danger"
+              style={{ width: '100%', padding: '10px', fontSize: 12 }}
+              onClick={() => onSimulateDrop(0.026)}
             >
-              {teeView ? '👁 TEE VIEW' : '🚫 REDACTED'}
+              <TrendingDown size={14} />
+              <span>Simulate Flash Crash ($0.0260)</span>
             </button>
           </div>
-          <div style={{ padding: '18px 20px' }}>
-            <div style={{ fontSize: 10, color: 'var(--overlay1)', marginBottom: 6, letterSpacing: '0.08em' }}>
-              KINETIC PROTOCOL · LIQ THRESHOLD = 85%
-            </div>
-
-            {/* Big HF number */}
-            <AnimatePresence mode="wait">
-              {teeView ? (
-                <motion.div
-                  key="tee-view"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  ref={hfRef}
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 34,
-                    fontWeight: 800,
-                    color: hfColor,
-                    letterSpacing: '-0.02em',
-                    marginBottom: 6,
-                  }}
-                >
-                  {debtUsd === 0 ? '∞' : <CountUp to={healthFactor} decimals={4} />}
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="redacted"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 34,
-                    fontWeight: 800,
-                    color: 'var(--surface2)',
-                    letterSpacing: '0.1em',
-                    marginBottom: 6,
-                  }}
-                >
-                  ██████
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div style={{ marginBottom: 8 }}>
-              <span className={`badge ${statusClass}`}>
-                {statusIcon} {status}
-              </span>
-            </div>
-
-            {/* Threshold visualization */}
-            <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 10, color: 'var(--overlay0)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                Position vs. Threshold
-              </div>
-              <div className="hf-bar-track" style={{ position: 'relative' }}>
-                <div className="hf-bar-fill" style={{ width: `${hfBarWidth}%`, background: hfColor }} />
-                {/* Threshold line */}
-                <div style={{
-                  position: 'absolute',
-                  left: `${threshBarLeft}%`,
-                  top: -5, bottom: -5,
-                  width: 2,
-                  background: 'var(--mauve)',
-                  borderRadius: 1,
-                  zIndex: 2,
-                }} />
-                {/* Liquidation line at 1.0 */}
-                <div style={{
-                  position: 'absolute',
-                  left: `${(1.0 / 2.5) * 100}%`,
-                  top: -3, bottom: -3,
-                  width: 1,
-                  background: 'var(--red)',
-                  opacity: 0.6,
-                  zIndex: 2,
-                }} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--overlay0)', marginTop: 5 }}>
-                <span style={{ color: 'var(--red)' }}>0.0</span>
-                <span style={{ color: 'var(--red)' }}>1.0 liq.</span>
-                <span style={{ color: 'var(--mauve)' }}>▲ {thresholdHf.toFixed(2)} TEE</span>
-                <span style={{ color: 'var(--green)' }}>2.5 safe</span>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 14, fontSize: 11, color: 'var(--overlay1)' }}>
-              <div>Collateral: <span style={{ color: 'var(--text)' }}>${collateralUsd.toFixed(2)}</span></div>
-              <div>Liq. Threshold: <span style={{ color: 'var(--text)' }}>${liqThresholdUsd.toFixed(2)}</span></div>
-              <div>Debt: <span style={{ color: debtUsd > 0 ? 'var(--peach)' : 'var(--green)' }}>${debtUsd.toFixed(2)}</span></div>
-            </div>
-          </div>
         </div>
 
-        {/* ── Keeper Status Panel ── */}
-        <div className="panel" style={{ border: '1px solid var(--border-surface)' }}>
-          <div className="panel-titlebar">
-            <span className="dot" style={{ background: teeArmed ? 'var(--green)' : 'var(--overlay1)' }} />
-            <span>Keeper Status</span>
-            <span style={{ flex: 1 }} />
-            <span className={`badge ${teeArmed ? 'badge--green' : 'badge--dim'}`}>
-              {teeArmed ? 'ARMED' : 'STANDBY'}
+        {/* Column 2: Health Factor Engine (Confidential TEE View) */}
+        <div className="fintech-card fintech-card--active" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{ fontSize: 11, color: 'var(--tech-purple)', fontWeight: 600, textTransform: 'uppercase' }}>
+              Confidential TEE Engine
+            </span>
+            <button
+              type="button"
+              onClick={() => setTeeView(v => !v)}
+              className="btn btn--surface"
+              style={{ fontSize: 11, padding: '3px 8px', borderRadius: '6px', gap: 4 }}
+            >
+              {teeView ? <EyeOff size={12} /> : <Eye size={12} />}
+              <span>{teeView ? 'Hide Enclave' : 'Reveal Enclave'}</span>
+            </button>
+          </div>
+
+          <span style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+            Evaluated Position Health
+          </span>
+
+          <AnimatePresence mode="wait">
+            {teeView ? (
+              <motion.div
+                key="tee-view"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                ref={hfRef}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 34,
+                  fontWeight: 800,
+                  color: isLiquidatable ? 'var(--risk-red)' : isTeeZone ? 'var(--risk-red)' : 'var(--money-green)',
+                  letterSpacing: '-0.02em',
+                  marginBottom: 6,
+                }}
+              >
+                {debtUsd === 0 ? '∞' : <CountUp to={healthFactor} decimals={4} />}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="redacted"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 34,
+                  fontWeight: 800,
+                  color: 'var(--text-muted)',
+                  letterSpacing: '0.06em',
+                  marginBottom: 6,
+                }}
+              >
+                ••••••••
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div style={{ marginBottom: 20 }}>
+            <span className={`badge ${isLiquidatable ? 'badge--red' : isTeeZone ? 'badge--red' : 'badge--green'}`} style={{ fontSize: 10 }}>
+              {statusText}
             </span>
           </div>
-          <div style={{ padding: '18px 20px' }}>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <StatusRow label="FCC Mode" value="MODE=0 (Simulation)" accent="var(--mauve)" />
-              <StatusRow label="Enclave" value="tee-proxy :6662" accent="var(--mauve)" />
-              <StatusRow label="PMW Signer" value="0x7099…79C8" accent="var(--mauve)" />
-              <StatusRow label="Reaction Time" value="Sub-second (<1.8s block)" accent="var(--green)" />
-              <StatusRow label="FTSOv2 Feed" value="FLR/USD · 0x01464c…" accent="var(--blue)" />
-              <StatusRow
-                label="Vault Reserve"
-                value={`$${vaultReserveUsd.toFixed(2)} USD`}
-                accent={vaultReserveUsd > 0 ? 'var(--green)' : 'var(--red)'}
-              />
-              <StatusRow
-                label="TEE Threshold"
-                value={`HF ≤ ${thresholdHf.toFixed(2)}`}
-                accent="var(--mauve)"
-                private
-              />
+          {/* Progress Margin Visual */}
+          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: 18 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+              <span>Liquidation: 1.00 HF</span>
+              <span style={{ color: 'var(--tech-purple)', fontWeight: 600 }}>Private Trigger: {thresholdHf.toFixed(2)} HF</span>
             </div>
 
             <div style={{
-              marginTop: 16,
-              padding: '10px 12px',
-              background: 'var(--mantle)',
-              border: '1px solid var(--border-dim)',
-              borderRadius: 2,
-              fontSize: 11,
-              color: 'var(--overlay1)',
+              position: 'relative',
+              height: 8,
+              background: '#0D0D14',
+              borderRadius: '999px',
+              overflow: 'hidden',
+              marginBottom: 8,
             }}>
-              <div style={{ marginBottom: 3, color: 'var(--overlay2)', fontWeight: 600 }}>TEE Privacy Guarantee</div>
-              Trigger params encrypted in enclave memory.
-              Public mempool sees <span style={{ color: 'var(--green)' }}>0 pending defense txs</span>.
+              <div style={{
+                width: `${hfBarWidth}%`,
+                height: '100%',
+                background: healthFactor < 1.0 ? 'var(--risk-red)' : healthFactor <= thresholdHf ? 'var(--risk-red)' : 'linear-gradient(90deg, #9B7FFF, #2ED47A)',
+                borderRadius: '999px',
+                transition: 'width 0.3s ease',
+              }} />
             </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-secondary)' }}>
+              <span>Target Safe Buffer: 1.30 HF</span>
+              <span style={{ color: 'var(--money-green)' }}>Zero MEV Leakage</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Column 3: Vault Reserve & MEV Preemption */}
+        <div className="fintech-card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+              Vault Reserve
+            </span>
+            <span className="badge badge--green" style={{ fontSize: 10 }}>
+              AegisVault Active
+            </span>
+          </div>
+
+          <span style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+            Available Repayment Collateral
+          </span>
+          <div style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 34,
+            fontWeight: 800,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.02em',
+            marginBottom: 4,
+          }}>
+            $<CountUp to={vaultReserveUsd} decimals={2} />
+          </div>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 24 }}>
+            Max Auto-Repay Cap: ${repayUsd.toFixed(2)} USD
+          </span>
+
+          {/* MEV Savings Indicator */}
+          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: 18 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 600 }}>
+              MEV Preemption Status
+            </div>
+
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              borderRadius: '10px',
+              padding: '12px',
+              marginBottom: 12,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
+                <span style={{ color: 'var(--text-muted)' }}>Public Mempool Visibility:</span>
+                <span style={{ color: 'var(--money-green)', fontWeight: 600 }}>0 Bytes (Private)</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                <span style={{ color: 'var(--text-muted)' }}>Liquidation Penalty Avoided:</span>
+                <span style={{ color: 'var(--money-green)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                  ~${(debtUsd * 0.50 * 0.08).toFixed(2)} USD
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onReset}
+              className="btn btn--surface"
+              style={{ width: '100%', padding: '9px', fontSize: 11 }}
+            >
+              <RefreshCw size={13} />
+              <span>Reset Parameters</span>
+            </button>
           </div>
         </div>
 
       </div>
     </motion.div>
-  );
-}
-
-function StatusRow({ label, value, accent, private: isPrivate }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-dim)', paddingBottom: 8 }}>
-      <span style={{ fontSize: 11, color: 'var(--overlay1)', display: 'flex', alignItems: 'center', gap: 5 }}>
-        {isPrivate && <span style={{ fontSize: 10 }}>🔐</span>}
-        {label}
-      </span>
-      <span style={{ fontSize: 11, fontWeight: 600, color: accent, fontFamily: 'var(--font-mono)' }}>{value}</span>
-    </div>
   );
 }
