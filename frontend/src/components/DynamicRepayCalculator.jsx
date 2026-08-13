@@ -27,10 +27,10 @@ export default function DynamicRepayCalculator({ liveFlrPrice = 0.035, onEnterDe
 
   return (
     <div
-      className="fintech-card"
+      className="fintech-card fintech-card--flat"
       style={{
         padding: '32px',
-        maxWidth: '920px',
+        maxWidth: '800px',
         margin: '0 auto',
         background: 'rgba(18, 18, 26, 0.75)',
         border: '1px solid var(--border-card)',
@@ -51,7 +51,7 @@ export default function DynamicRepayCalculator({ liveFlrPrice = 0.035, onEnterDe
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span className="badge badge--purple" style={{ fontSize: 10 }}>
+          <span className="badge badge--neutral" style={{ fontSize: 10 }}>
             Compound V2 + FTSOv2 Math
           </span>
         </div>

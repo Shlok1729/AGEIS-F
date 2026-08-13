@@ -577,40 +577,47 @@ export default function App() {
               />
             </div>
 
-            {/* Step 1: Position Setup Panel */}
-            {demoStep === 1 && (
-              <PositionSetupPanel
-                config={config}
-                onChange={handleConfigChange}
-                onRegister={handleRegisterAndAdvance}
-                isArming={isArming}
-              />
-            )}
+            <div className="demo-layout-grid">
+              {/* ── Left Column (Control) ── */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                {/* Step 1: Position Setup Panel */}
+                {demoStep === 1 && (
+                  <PositionSetupPanel
+                    config={config}
+                    onChange={handleConfigChange}
+                    onRegister={handleRegisterAndAdvance}
+                    isArming={isArming}
+                  />
+                )}
 
-            {/* Step 2: Live Monitor Dashboard */}
-            {demoStep === 2 && (
-              <>
-                <BlackSwanStressTester
-                  currentPrice={flrPrice}
-                  onTriggerScenario={handleSimulateDrop}
-                />
+                {/* Step 2: BlackSwan Stress Tester (Control side) */}
+                {demoStep === 2 && (
+                  <BlackSwanStressTester
+                    currentPrice={flrPrice}
+                    onTriggerScenario={handleSimulateDrop}
+                  />
+                )}
+              </div>
 
-                <LiveMonitorDashboard
-                  flrPrice={flrPrice}
-                  config={config}
-                  teeArmed={teeArmed}
-                  vaultReserveUsd={vaultReserveUsd}
-                  mevSavings={mevSavings}
-                  onSimulateDrop={handleSimulateDrop}
-                  onReset={handleReset}
-                  lastTick={lastTick}
-                />
-              </>
-            )}
-
-            {/* Persistent Execution Event Log */}
-            <div style={{ marginTop: 24 }}>
-              <EventLog logs={logs} />
+              {/* ── Right Column (Output / Monitoring) ── */}
+              <div className="demo-sticky-col">
+                {/* Step 2: Live Monitor Dashboard */}
+                {demoStep === 2 && (
+                  <LiveMonitorDashboard
+                    flrPrice={flrPrice}
+                    config={config}
+                    teeArmed={teeArmed}
+                    vaultReserveUsd={vaultReserveUsd}
+                    mevSavings={mevSavings}
+                    onSimulateDrop={handleSimulateDrop}
+                    onReset={handleReset}
+                    lastTick={lastTick}
+                  />
+                )}
+                
+                {/* Persistent Execution Event Log */}
+                <EventLog logs={logs} />
+              </div>
             </div>
           </motion.div>
         )}
@@ -627,7 +634,7 @@ export default function App() {
             style={{ padding: '24px 0' }}
           >
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <span className="badge badge--purple" style={{ fontSize: 10, marginBottom: 8 }}>
+              <span className="badge badge--neutral" style={{ fontSize: 10, marginBottom: 8 }}>
                 Risk Engine & Math Sandbox
               </span>
               <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
@@ -668,10 +675,10 @@ export default function App() {
             transition={{ duration: 0.3 }}
             style={{ padding: '24px 0' }}
           >
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <span className="badge badge--purple" style={{ fontSize: 10, marginBottom: 8 }}>
-                Treasury & Fund Management
-              </span>
+            <div style={{ padding: '40px 0', textAlign: 'center' }}>
+            <span className="badge badge--neutral" style={{ fontSize: 10, marginBottom: 8 }}>
+              Institutional Monitoring Desk
+            </span>
               <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                 Multi-Asset Risk & Enclave Orchestration Desk
               </h2>

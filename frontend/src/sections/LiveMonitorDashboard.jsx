@@ -81,7 +81,7 @@ export default function LiveMonitorDashboard({
       }}>
 
         {/* Column 1: Public Oracle & Market Simulator */}
-        <div className="fintech-card" style={{ padding: '24px' }}>
+        <div className="fintech-card fintech-card--flat" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
               Public Oracle Feed
@@ -149,7 +149,7 @@ export default function LiveMonitorDashboard({
         </div>
 
         {/* Column 2: Health Factor Engine (Confidential TEE View) */}
-        <div className="fintech-card fintech-card--active" style={{ padding: '24px' }}>
+        <div className={`fintech-card ${teeArmed ? 'fintech-card--tee-active' : 'fintech-card--flat'}`} style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={{ fontSize: 11, color: 'var(--tech-purple)', fontWeight: 600, textTransform: 'uppercase' }}>
               Confidential TEE Engine
@@ -246,7 +246,7 @@ export default function LiveMonitorDashboard({
         </div>
 
         {/* Column 3: Vault Reserve & MEV Preemption */}
-        <div className="fintech-card" style={{ padding: '24px' }}>
+        <div className="fintech-card fintech-card--flat" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
               Vault Reserve

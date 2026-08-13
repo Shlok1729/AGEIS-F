@@ -38,7 +38,7 @@ export default function AggregateStatsBar() {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="fintech-card"
+      className="fintech-card fintech-card--flat"
       style={{
         padding: '20px 24px',
         marginBottom: 28,

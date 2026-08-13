@@ -143,16 +143,36 @@ pre {
   border-radius: var(--radius-lg);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
-.fintech-card:hover {
+.fintech-card--flat {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+
+.fintech-card--flat:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.fintech-card--actionable {
+  background: rgba(18, 18, 26, 0.8);
+}
+
+.fintech-card--actionable:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+.fintech-card--tee:hover {
   border-color: rgba(155, 127, 255, 0.25);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 30px var(--tech-purple-glow);
 }
 
-.fintech-card--active {
+.fintech-card--tee-active {
   border-color: var(--tech-purple-border);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 32px var(--tech-purple-glow);
 }
@@ -423,5 +443,40 @@ input[type="range"]::-webkit-slider-thumb:hover {
     flex-direction: column;
     gap: 8px;
     align-items: flex-start !important;
+  }
+}
+
+/* ── Demo Two-Column Layout ── */
+.demo-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 32px;
+  align-items: start;
+}
+
+.demo-sticky-col {
+  position: sticky;
+  top: 140px; /* Leave room for NavBar (60) + StatusBar (approx 40) + margin */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* max-height to ensure EventLog can scroll if needed */
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+/* Hide scrollbar for the sticky column for cleaner look */
+.demo-sticky-col::-webkit-scrollbar {
+  width: 0px;
+}
+
+@media (max-width: 1100px) {
+  .demo-layout-grid {
+    grid-template-columns: 1fr;
+  }
+  .demo-sticky-col {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
   }
 }

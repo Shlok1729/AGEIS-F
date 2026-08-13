@@ -60,22 +60,13 @@ export default function PortfolioRiskHeatmap({ onOpenPosition }) {
   };
 
   return (
-    <div
-      className="fintech-card"
-      style={{
-        padding: '28px',
-        maxWidth: '1080px',
-        margin: '0 auto',
-        background: 'rgba(18, 18, 26, 0.75)',
-        border: '1px solid var(--border-card)',
-      }}
-    >
+    <div className="fintech-card fintech-card--flat" style={{ padding: '32px', maxWidth: '1080px', margin: '0 auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 14 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <LayoutGrid size={16} style={{ color: 'var(--tech-purple)' }} />
-            <span className="badge badge--purple" style={{ fontSize: 10 }}>
+            <span className="badge badge--neutral" style={{ fontSize: 10 }}>
               Institutional Treasury Desk
             </span>
           </div>

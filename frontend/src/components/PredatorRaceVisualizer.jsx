@@ -25,7 +25,7 @@ export default function PredatorRaceVisualizer() {
 
   return (
     <div
-      className="fintech-card"
+      className="fintech-card fintech-card--flat"
       style={{
         padding: '28px',
         maxWidth: '960px',
