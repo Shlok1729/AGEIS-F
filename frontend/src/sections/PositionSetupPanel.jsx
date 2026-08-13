@@ -120,7 +120,7 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
         <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 12 }}>
           Select safety preset
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div className="grid-responsive-3">
           <PresetButton
             active={selectedPreset === 'conservative'}
             onClick={() => applyPreset('conservative')}
@@ -152,10 +152,7 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
       </div>
 
       {/* Form Fields */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: 24,
+      <div className="grid-responsive-4" style={{
         borderTop: '1px solid rgba(255, 255, 255, 0.05)',
         paddingTop: 28,
         marginBottom: 32,

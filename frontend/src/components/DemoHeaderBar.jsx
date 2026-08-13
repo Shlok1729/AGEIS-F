@@ -21,6 +21,8 @@ export default function DemoHeaderBar({ flrPrice, teeArmed, onReset }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 12,
         fontSize: 12,
         backdropFilter: 'var(--glass-blur)',
       }}

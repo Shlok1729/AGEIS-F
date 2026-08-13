@@ -91,12 +91,7 @@ export default function PortfolioRiskHeatmap({ onOpenPosition }) {
       </div>
 
       {/* Aggregate Portfolio Bar */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: 12,
-        marginBottom: 20,
-      }}>
+      <div className="grid-responsive-4" style={{ marginBottom: 20 }}>
         <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.04)', borderRadius: '10px', padding: '12px 14px' }}>
           <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Portfolio TVL</span>
           <div style={{ fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', marginTop: 2 }}>
@@ -127,11 +122,7 @@ export default function PortfolioRiskHeatmap({ onOpenPosition }) {
       </div>
 
       {/* Position Cards Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: 14,
-      }}>
+      <div className="grid-responsive-2">
         {positions.map((pos) => (
           <div
             key={pos.id}

@@ -134,6 +134,9 @@ export default function ContractsVerificationPanel() {
                 padding: '5px 12px',
                 borderRadius: '6px',
                 border: '1px solid rgba(255, 255, 255, 0.04)',
+                maxWidth: '100%',
+                overflowX: 'auto',
+                whiteSpace: 'nowrap',
               }}>
                 {c.address}
               </span>

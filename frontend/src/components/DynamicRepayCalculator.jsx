@@ -58,12 +58,7 @@ export default function DynamicRepayCalculator({ liveFlrPrice = 0.035, onEnterDe
       </div>
 
       {/* Sliders Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: 24,
-        marginBottom: 32,
-      }}>
+      <div className="grid-responsive-2" style={{ marginBottom: 32 }}>
         {/* Slider 1: Collateral */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 12 }}>
@@ -138,12 +133,7 @@ export default function DynamicRepayCalculator({ liveFlrPrice = 0.035, onEnterDe
       </div>
 
       {/* Real-time Math Output Hero Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 16,
-        marginBottom: 24,
-      }}>
+      <div className="grid-responsive-3" style={{ marginBottom: 24 }}>
         {/* Output 1: Current Health Factor */}
         <div style={{
           background: 'rgba(255, 255, 255, 0.02)',

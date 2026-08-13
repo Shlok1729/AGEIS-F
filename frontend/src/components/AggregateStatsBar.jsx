@@ -60,11 +60,7 @@ export default function AggregateStatsBar() {
         </div>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: 14,
-      }}>
+      <div className="grid-responsive-5">
         <MetricCard
           label="Total Value Protected"
           value={<>$<CountUp to={stats.totalValueProtectedUsd} decimals={0} /></>}

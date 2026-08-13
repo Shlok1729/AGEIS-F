@@ -26,16 +26,11 @@ export default function LandingHero({ onEnterDemo, onOpenSimulator, flrPrice = 0
 
   return (
     <section ref={containerRef} style={{ padding: '56px 0 40px' }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1.15fr 0.85fr',
-        gap: 48,
-        alignItems: 'center',
-      }}>
+      <div className="landing-hero-grid">
         {/* Left Column: Copy & Actions */}
         <div>
           {/* Eyebrow */}
-          <div className="hero-eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+          <div className="hero-eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
             <span className="badge badge--purple" style={{ fontSize: 11 }}>
               <Cpu size={12} />
               <span>Flare Confidential Compute (FCC)</span>

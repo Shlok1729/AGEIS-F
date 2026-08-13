@@ -494,7 +494,7 @@ export default function App() {
 
       <NavBar />
 
-      <main style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--space-4) var(--space-8)', position: 'relative', zIndex: 1 }}>
+      <main className="main-app-container">
 
         {/* ══════════════════════════════════════════════════════════════════════
             DESTINATION 1: HOME (FOCUSED, CLEAN OVERVIEW)
