@@ -17,7 +17,7 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
   const collateralUsd = collateralFlr * flrPriceEst;
   const liqThreshUsd  = collateralUsd * 0.85;
   const hfLive        = debtUsd > 0 ? liqThreshUsd / debtUsd : Infinity;
-  const hfColor       = hfLive >= 1.5 ? 'var(--text)' : hfLive >= 1.15 ? 'var(--peach)' : 'var(--red)';
+  const hfColor       = hfLive >= 1.5 ? 'var(--text-primary)' : hfLive >= 1.15 ? '#F59E0B' : 'var(--risk-red)';
 
   const applyPreset = (presetKey) => {
     setSelectedPreset(presetKey);
@@ -57,13 +57,13 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
         fontSize: 12,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: 'var(--overlay1)' }}>Borrower Account:</span>
+          <span style={{ color: 'var(--text-muted)' }}>Borrower Account:</span>
           {account ? (
-            <span style={{ color: 'var(--mauve)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+            <span style={{ color: 'var(--tech-purple)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
               {formatAddress(account)}
             </span>
           ) : (
-            <span style={{ color: 'var(--subtext0)', fontFamily: 'var(--font-mono)' }}>
+            <span style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
               0x7099…79C8 (Demo Simulation)
             </span>
           )}
@@ -75,8 +75,8 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {account && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: 'var(--overlay1)' }}>Vault Reserve:</span>
-              <span style={{ color: 'var(--text)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Vault Reserve:</span>
+              <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                 {vaultReserve} C2FLR
               </span>
               <button
@@ -94,7 +94,7 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
 
       {/* Dynamic Health Factor Hero Number */}
       <div style={{ textAlign: 'center', marginBottom: 36, marginTop: 4 }}>
-        <span style={{ fontSize: 11, color: 'var(--overlay1)', fontWeight: 600, letterSpacing: '0.04em' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.04em' }}>
           Simulated position health factor
         </span>
         <div style={{
@@ -109,15 +109,15 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
         }}>
           {isFinite(hfLive) ? hfLive.toFixed(4) : '∞'}
         </div>
-        <p style={{ fontSize: 12, color: 'var(--overlay1)', maxWidth: 440, margin: '0 auto', lineHeight: 1.5 }}>
-          Your stop-loss threshold is set to <span style={{ color: 'var(--mauve)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{thresholdHf.toFixed(2)} HF</span>.
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 440, margin: '0 auto', lineHeight: 1.5 }}>
+          Your stop-loss threshold is set to <span style={{ color: 'var(--tech-purple)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{thresholdHf.toFixed(2)} HF</span>.
           Public liquidators can act once your position crosses 1.00 HF.
         </p>
       </div>
 
       {/* Preset Profiles */}
       <div style={{ marginBottom: 32 }}>
-        <div style={{ fontSize: 11, color: 'var(--overlay1)', fontWeight: 600, marginBottom: 12 }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 12 }}>
           Select safety preset
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
@@ -171,7 +171,7 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
               onChange('collateralFlr', Number(e.target.value));
             }}
           />
-          <div style={{ fontSize: 11, color: 'var(--overlay1)', marginTop: 6, fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, fontFamily: 'var(--font-mono)' }}>
             ≈ ${(collateralFlr * flrPriceEst).toFixed(2)} USD
           </div>
         </FieldGroup>
@@ -187,7 +187,7 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
               onChange('debtUsd', Number(e.target.value));
             }}
           />
-          <div style={{ fontSize: 11, color: 'var(--overlay1)', marginTop: 6, fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, fontFamily: 'var(--font-mono)' }}>
             Limit: ${(collateralUsd * 0.80).toFixed(2)}
           </div>
         </FieldGroup>
@@ -204,7 +204,7 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
               onChange('thresholdHf', Number(e.target.value));
             }}
           />
-          <div style={{ fontSize: 11, color: 'var(--overlay1)', marginTop: 6 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
             Private trigger TEE
           </div>
         </FieldGroup>
@@ -220,7 +220,7 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
               onChange('repayUsd', Number(e.target.value));
             }}
           />
-          <div style={{ fontSize: 11, color: 'var(--overlay1)', marginTop: 6 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
             Dynamic recovery
           </div>
         </FieldGroup>
@@ -237,8 +237,8 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
         border: '1px solid rgba(255, 255, 255, 0.03)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Lock size={14} style={{ color: 'var(--mauve)' }} />
-          <span style={{ fontSize: 12, color: 'var(--overlay1)' }}>
+          <Lock size={14} style={{ color: 'var(--tech-purple)' }} />
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
             {account
               ? 'Clicking below generates an off-chain EIP-191 signature to securely arm your confidential TEE enclave.'
               : 'Your stop-loss threshold stays private in enclave memory until it fires.'}
@@ -271,13 +271,13 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
 function FieldGroup({ label, hint, children }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--overlay1)', marginBottom: 8 }}>
+      <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8 }}>
         {label}
       </label>
       <div style={{ position: 'relative' }}>
         {children}
       </div>
-      <span style={{ fontSize: 11, color: 'var(--overlay0)', marginTop: 6 }}>
+      <span style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 6 }}>
         {hint}
       </span>
     </div>
@@ -290,8 +290,8 @@ function PresetButton({ active, onClick, title, badge, threshold, target, descri
       type="button"
       onClick={onClick}
       style={{
-        background: active ? 'rgba(203, 166, 247, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-        border: `1px solid ${active ? 'var(--mauve)' : 'transparent'}`,
+        background: active ? 'rgba(155, 127, 255, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+        border: `1px solid ${active ? 'var(--tech-purple)' : 'transparent'}`,
         borderRadius: '12px',
         padding: '16px',
         textAlign: 'left',
@@ -303,12 +303,12 @@ function PresetButton({ active, onClick, title, badge, threshold, target, descri
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: active ? 'var(--mauve)' : 'var(--text)' }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: active ? 'var(--tech-purple)' : 'var(--text-primary)' }}>
           {title}
         </span>
         <span style={{
           fontSize: 9,
-          color: active ? 'var(--mauve)' : 'var(--overlay1)',
+          color: active ? 'var(--tech-purple)' : 'var(--text-muted)',
           background: 'rgba(255,255,255,0.04)',
           padding: '2px 6px',
           borderRadius: '4px',
@@ -318,11 +318,11 @@ function PresetButton({ active, onClick, title, badge, threshold, target, descri
         </span>
       </div>
       <div style={{ display: 'flex', gap: 6, fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
-        <span style={{ color: active ? 'var(--mauve)' : 'var(--text)' }}>{threshold}</span>
-        <span style={{ color: 'var(--overlay0)' }}>➔</span>
-        <span style={{ color: 'var(--green)' }}>{target}</span>
+        <span style={{ color: active ? 'var(--tech-purple)' : 'var(--text-primary)' }}>{threshold}</span>
+        <span style={{ color: 'var(--text-secondary)' }}>➔</span>
+        <span style={{ color: 'var(--money-green)' }}>{target}</span>
       </div>
-      <p style={{ fontSize: 11, color: 'var(--overlay1)', lineHeight: 1.4, marginTop: 4 }}>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4, marginTop: 4 }}>
         {description}
       </p>
     </button>

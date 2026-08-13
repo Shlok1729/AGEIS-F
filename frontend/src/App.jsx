@@ -670,15 +670,18 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            style={{ padding: '24px 0' }}
+            style={{ paddingTop: 'var(--space-4)' }}
           >
-            <div style={{ padding: 'var(--space-6) 0', textAlign: 'center' }}>
-            <span className="badge badge--neutral" style={{ fontSize: 10, marginBottom: 8 }}>
-              Institutional Monitoring Desk
-            </span>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            <div style={{ marginBottom: 'var(--space-5)', textAlign: 'center' }}>
+              <span className="badge badge--neutral" style={{ fontSize: 10, marginBottom: 'var(--space-3)' }}>
+                Institutional Monitoring Desk
+              </span>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 'var(--space-2)' }}>
                 Multi-Asset Risk & Enclave Orchestration Desk
               </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 14, maxWidth: 600, margin: '0 auto' }}>
+                Monitor system-wide health factors and simulate real-time liquidation scenarios backed by hardware-level execution guarantees.
+              </p>
             </div>
 
             <PortfolioRiskHeatmap onOpenPosition={() => navigate('demo')} />
@@ -694,15 +697,18 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            style={{ padding: '24px 0' }}
+            style={{ paddingTop: 'var(--space-4)' }}
           >
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <span className="badge badge--green" style={{ fontSize: 10, marginBottom: 8 }}>
+            <div style={{ textAlign: 'center', marginBottom: 'var(--space-5)' }}>
+              <span className="badge badge--green" style={{ fontSize: 10, marginBottom: 'var(--space-3)' }}>
                 Flare Coston2 & TEE Verifications
               </span>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: 'var(--space-2)' }}>
                 Smart Contracts, Compilers & Enclave Proofs
               </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 14, maxWidth: 600, margin: '0 auto' }}>
+                Cryptographic attestations verifying that our execution enclaves match their open-source blueprints and operate with zero mempool leakage.
+              </p>
             </div>
 
             <ContractsVerificationPanel />

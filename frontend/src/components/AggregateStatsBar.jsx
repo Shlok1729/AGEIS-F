@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Activity, DollarSign, Clock, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Activity, DollarSign, Zap, Lock } from 'lucide-react';
 import CountUp from './CountUp';
 import { fetchKeeperStats } from '../services/keeperApi';
 
@@ -69,51 +69,67 @@ export default function AggregateStatsBar() {
           label="Total Value Protected"
           value={<>$<CountUp to={stats.totalValueProtectedUsd} decimals={0} /></>}
           sub="Cumulative borrower TVL"
+          icon={Lock}
+          accentColor="var(--text-primary)"
         />
         <MetricCard
           label="Total MEV Saved"
           value={<>+$<CountUp to={stats.totalMevSavedUsd} decimals={0} /></>}
           sub="8% liquidation penalty avoided"
-          color="var(--money-green)"
+          icon={DollarSign}
+          accentColor="var(--money-green)"
           highlightGreen
         />
         <MetricCard
           label="Monitored Positions"
           value={<CountUp to={stats.totalPositionsMonitored} decimals={0} />}
           sub={`${stats.activeTriggers} triggers active in TEE`}
+          icon={Activity}
+          accentColor="var(--text-primary)"
         />
         <MetricCard
           label="Automated Rescues"
           value={<CountUp to={stats.successfulRescues} decimals={0} />}
           sub="Pre-mempool dynamic repayments"
-          color="var(--money-green)"
+          icon={ShieldCheck}
+          accentColor="var(--money-green)"
         />
         <MetricCard
           label="Avg Execution Latency"
           value={`<${stats.avgExecutionLatencyMs}ms`}
           sub="Sub-second FTSOv2 ticks"
-          color="var(--tech-purple)"
+          icon={Zap}
+          accentColor="var(--tech-purple)"
         />
       </div>
     </motion.div>
   );
 }
 
-function MetricCard({ label, value, sub, color = 'var(--text-primary)', highlightGreen }) {
+function MetricCard({ label, value, sub, accentColor = 'var(--text-primary)', highlightGreen, icon: Icon }) {
+  let topBorderColor = 'rgba(255, 255, 255, 0.08)';
+  if (accentColor.includes('money-green')) topBorderColor = 'var(--money-green-border)';
+  if (accentColor.includes('tech-purple')) topBorderColor = 'var(--tech-purple-border)';
+  if (accentColor.includes('risk-red')) topBorderColor = 'var(--risk-red-border)';
+
   return (
     <div style={{
       background: highlightGreen ? 'rgba(46, 212, 122, 0.04)' : 'rgba(255, 255, 255, 0.015)',
       border: `1px solid ${highlightGreen ? 'rgba(46, 212, 122, 0.2)' : 'rgba(255, 255, 255, 0.04)'}`,
+      borderTop: `2px solid ${topBorderColor}`,
       borderRadius: '10px',
       padding: '14px 16px',
     }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 600 }}>
-        {label}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        {Icon && <Icon size={14} style={{ color: accentColor }} />}
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>
+          {label}
+        </div>
       </div>
       <div style={{
         fontSize: '22px',
         fontWeight: 800,
-        color,
+        color: accentColor,
         fontFamily: 'var(--font-mono)',
         letterSpacing: '-0.02em',
         marginBottom: 2,
