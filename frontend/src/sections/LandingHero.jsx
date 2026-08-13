@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { Shield, ArrowRight, Play, Cpu, Lock, CheckCircle2 } from 'lucide-react';
 import HeroPositionTicket from '../components/HeroPositionTicket';
+import RotatingText from '../components/RotatingText';
 
 export default function LandingHero({ onEnterDemo, onOpenSimulator, flrPrice = 0.035 }) {
   const containerRef = useRef(null);
@@ -61,8 +62,18 @@ export default function LandingHero({ onEnterDemo, onOpenSimulator, flrPrice = 0
             <span className="hero-headline-word" style={{ display: 'inline-block', marginRight: '0.28em' }}>Lending</span>
             <span className="hero-headline-word" style={{ display: 'inline-block', marginRight: '0.28em' }}>Defense.</span>
             <br />
-            <span className="hero-headline-word gradient-text" style={{ display: 'inline-block', fontWeight: 800 }}>
-              Zero Mempool Front-Running.
+            <span className="hero-headline-word" style={{ display: 'inline-flex', fontWeight: 800 }}>
+              <RotatingText
+                texts={['Zero Mempool Leakage.', 'Hardware-Backed Defense.', 'Sub-Second MEV Preemption.']}
+                mainClassName="gradient-text"
+                staggerFrom="last"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '-120%' }}
+                staggerDuration={0.025}
+                transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+                rotationInterval={3500}
+              />
             </span>
           </h1>
 
