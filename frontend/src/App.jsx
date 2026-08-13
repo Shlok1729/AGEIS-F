@@ -25,7 +25,7 @@ import { useWallet }              from './services/WalletContext';
 import { formatAddress, CONTRACT_ADDRESSES } from './services/walletService';
 import { simulatePriceOnKeeper, registerTriggerOnKeeper } from './services/keeperApi';
 import { playClickSound, playRescueChime, playAlertBeep, isAudioMuted, toggleAudioMute } from './services/audioService';
-import { Shield, Play, Calculator, FileCheck, CheckCircle2, Cpu, Volume2, VolumeX, LayoutGrid, ArrowRight } from 'lucide-react';
+import { Shield, Play, Calculator, FileCheck, CheckCircle2, Cpu, Volume2, VolumeX, LayoutGrid, ArrowRight, Menu, X } from 'lucide-react';
 
 // ─── Utilities ─────────────────────────────────────────────────────────────
 
@@ -59,6 +59,7 @@ export default function App() {
   const [isArming, setIsArming]       = useState(false);
   const [isAttestationOpen, setIsAttestationOpen] = useState(false);
   const [muted, setMuted]             = useState(isAudioMuted);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // ── Active Asset Selection ──
   const [selectedAssetKey, setSelectedAssetKey] = useState('FLR');
@@ -260,123 +261,182 @@ export default function App() {
 
   // ── Top Navigation Bar ──
   const NavBar = () => (
-    <header style={{
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
-      background: 'rgba(10, 10, 15, 0.82)',
-      backdropFilter: 'blur(24px) saturate(160%)',
-      WebkitBackdropFilter: 'blur(24px) saturate(160%)',
-      borderBottom: '1px solid var(--border-subtle)',
-      padding: '0 32px',
-      height: 60,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}>
-      {/* Brand & Attestation Trigger */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span
-          onClick={() => navigate('home')}
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 800,
-            fontSize: 18,
-            color: 'var(--text-primary)',
-            letterSpacing: '-0.03em',
-            cursor: 'pointer',
-          }}
-        >
-          Aegis<span style={{ color: 'var(--tech-purple)' }}>-F</span>
-        </span>
+    <>
+      {/* ── Secondary Status Bar ── */}
+      <div className="status-bar-container" style={{
+        background: 'rgba(10, 10, 15, 0.95)',
+        borderBottom: '1px solid var(--border-subtle)',
+        padding: '6px 32px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        fontSize: 11
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              setIsAttestationOpen(true);
+            }}
+            style={{ 
+              fontSize: 10, padding: '3px 8px', borderRadius: '6px', gap: 4, 
+              display: 'flex', alignItems: 'center', background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-card)', color: 'var(--text-primary)',
+              cursor: 'pointer'
+            }}
+            title="Click to view hardware remote attestation quote"
+          >
+            <Cpu size={11} style={{ color: 'var(--tech-purple)' }} />
+            <span>FCC Attestation Active</span>
+          </button>
+        </div>
 
-        {/* TEE Attestation Badge / Modal Trigger */}
-        <button
-          type="button"
-          onClick={() => {
-            playClickSound();
-            setIsAttestationOpen(true);
-          }}
-          className="btn btn--surface"
-          style={{ fontSize: 10, padding: '3px 8px', borderRadius: '6px', gap: 4 }}
-          title="Click to view hardware remote attestation quote"
-        >
-          <Cpu size={11} style={{ color: 'var(--tech-purple)' }} />
-          <span>FCC Attestation</span>
-        </button>
-      </div>
-
-      {/* Center Nav Links */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <button
-          type="button"
-          className={`btn ${currentView === 'home' ? 'btn--primary' : 'btn--surface'}`}
-          onClick={() => navigate('home')}
-          style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
-        >
-          Overview
-        </button>
-        <button
-          type="button"
-          className={`btn ${currentView === 'demo' ? 'btn--primary' : 'btn--surface'}`}
-          onClick={() => navigate('demo')}
-          style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
-        >
-          Live Demo
-        </button>
-        <button
-          type="button"
-          className={`btn ${currentView === 'simulator' ? 'btn--primary' : 'btn--surface'}`}
-          onClick={() => navigate('simulator')}
-          style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
-        >
-          Calculator
-        </button>
-        <button
-          type="button"
-          className={`btn ${currentView === 'portfolio' ? 'btn--primary' : 'btn--surface'}`}
-          onClick={() => navigate('portfolio')}
-          style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
-        >
-          Portfolio Desk
-        </button>
-        <button
-          type="button"
-          className={`btn ${currentView === 'proofs' ? 'btn--primary' : 'btn--surface'}`}
-          onClick={() => navigate('proofs')}
-          style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
-        >
-          Proofs
-        </button>
-      </nav>
-
-      {/* Right Controls: Price + Sound + Wallet Button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)' }}>
           <span
             className="pulse-dot"
             style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--flare-blue)', display: 'inline-block' }}
           />
-          <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-sans)', fontSize: 11 }}>{activeAsset.symbol}/USD</span>
+          <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-sans)' }}>{activeAsset.symbol}/USD</span>
           <span style={{ color: 'var(--flare-blue)', fontWeight: 700 }}>
             $<CountUp to={flrPrice} decimals={activeAsset.decimals} />
           </span>
         </div>
-
-        {/* Audio Mute Toggle */}
-        <button
-          type="button"
-          onClick={handleToggleSound}
-          className="btn btn--surface"
-          style={{ padding: '6px', borderRadius: '8px', color: muted ? 'var(--text-muted)' : 'var(--tech-purple)' }}
-          title={muted ? 'Unmute sound effects' : 'Mute sound effects'}
-        >
-          {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-        </button>
-
-        <WalletButton />
       </div>
-    </header>
+
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: 'rgba(10, 10, 15, 0.82)',
+        backdropFilter: 'blur(24px) saturate(160%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+        borderBottom: '1px solid var(--border-subtle)',
+        padding: '0 32px',
+        height: 60,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+        {/* Brand */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span
+            onClick={() => navigate('home')}
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 800,
+              fontSize: 18,
+              color: 'var(--text-primary)',
+              letterSpacing: '-0.03em',
+              cursor: 'pointer',
+            }}
+          >
+            Aegis<span style={{ color: 'var(--tech-purple)' }}>-F</span>
+          </span>
+        </div>
+
+        {/* Center Nav Links (Desktop) */}
+        <nav className="nav-links-desktop">
+          <button
+            type="button"
+            className={`btn ${currentView === 'home' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('home'); }}
+            style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            className={`btn ${currentView === 'demo' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('demo'); }}
+            style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
+          >
+            Live Demo
+          </button>
+          <button
+            type="button"
+            className={`btn ${currentView === 'simulator' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('simulator'); }}
+            style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
+          >
+            Calculator
+          </button>
+          <button
+            type="button"
+            className={`btn ${currentView === 'portfolio' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('portfolio'); }}
+            style={{ fontSize: 12, padding: '6px 14px', borderRadius: '8px' }}
+          >
+            Portfolio
+          </button>
+        </nav>
+
+        {/* Right Controls: Sound, Wallet, Hamburger */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* Audio Mute Toggle */}
+          <button
+            type="button"
+            onClick={handleToggleSound}
+            className="btn btn--surface"
+            style={{ padding: '6px', borderRadius: '8px', color: muted ? 'var(--text-muted)' : 'var(--tech-purple)' }}
+            title={muted ? 'Unmute sound effects' : 'Mute sound effects'}
+          >
+            {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+          </button>
+
+          <WalletButton />
+
+          <button
+            type="button"
+            className="mobile-menu-btn"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Dropdown Menu */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-dropdown">
+          <button
+            type="button"
+            className={`btn ${currentView === 'home' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('home'); }}
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            className={`btn ${currentView === 'demo' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('demo'); }}
+          >
+            Live Demo
+          </button>
+          <button
+            type="button"
+            className={`btn ${currentView === 'simulator' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('simulator'); }}
+          >
+            Calculator
+          </button>
+          <button
+            type="button"
+            className={`btn ${currentView === 'portfolio' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('portfolio'); }}
+          >
+            Portfolio Desk
+          </button>
+          <button
+            type="button"
+            className={`btn ${currentView === 'proofs' ? 'btn--primary' : 'btn--surface'}`}
+            onClick={() => { setIsMobileMenuOpen(false); navigate('proofs'); }}
+          >
+            Proofs
+          </button>
+        </div>
+      )}
+    </>
   );
 
   return (
@@ -406,17 +466,23 @@ export default function App() {
             />
 
             {/* 3-Pillar Value Proof Strip */}
-            <div style={{ margin: '40px 0 32px' }}>
+            <div style={{ margin: '80px 0 60px' }}>
               <AggregateStatsBar />
             </div>
 
             {/* Execution Proof Trace Block (Single focused technical proof) */}
-            <div style={{ marginBottom: 40 }}>
-              <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <span className="badge badge--purple" style={{ fontSize: 10, marginBottom: 8 }}>
+            <div style={{ 
+              marginBottom: 80,
+              background: 'rgba(255, 255, 255, 0.015)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '24px',
+              padding: '60px 40px'
+            }}>
+              <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                <span className="badge badge--purple" style={{ fontSize: 10, marginBottom: 12 }}>
                   Zero Mempool Leakage Proof
                 </span>
-                <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>
+                <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>
                   Confidential Enclave vs. Public Mempool Execution
                 </h2>
               </div>
@@ -428,7 +494,7 @@ export default function App() {
               background: 'rgba(155, 127, 255, 0.04)',
               border: '1px solid rgba(155, 127, 255, 0.18)',
               borderRadius: '16px',
-              padding: '32px',
+              padding: '40px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
