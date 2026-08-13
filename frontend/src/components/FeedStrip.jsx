@@ -24,9 +24,9 @@ const FEEDS = [
     basePrice: 0.035,
     jitterPct: 0.008,   // ±0.8% per tick
     primary: true,      // Connected to HF calculation
-    color: 'var(--mauve)',
-    bgColor: 'rgba(203,166,247,0.06)',
-    borderColor: 'rgba(203,166,247,0.35)',
+    color: 'var(--tech-purple)',
+    bgColor: 'rgba(155, 127, 255, 0.06)',
+    borderColor: 'var(--tech-purple-border)',
   },
   {
     id: 'BTC/USD',
@@ -36,7 +36,7 @@ const FEEDS = [
     basePrice: 108420.0,
     jitterPct: 0.003,
     primary: false,
-    color: 'var(--peach)',
+    color: '#F59E0B',
     bgColor: 'rgba(250,179,135,0.04)',
     borderColor: 'rgba(250,179,135,0.15)',
   },
@@ -48,8 +48,8 @@ const FEEDS = [
     basePrice: 3280.0,
     jitterPct: 0.004,
     primary: false,
-    color: 'var(--blue)',
-    bgColor: 'rgba(137,180,250,0.04)',
+    color: 'var(--flare-blue)',
+    bgColor: 'var(--flare-blue-glow)',
     borderColor: 'rgba(137,180,250,0.12)',
   },
   {
@@ -118,14 +118,14 @@ export default function FeedStrip({ flrPriceOverride, lastTick }) {
       if (!el) return;
       gsap.fromTo(el,
         { color: f.color, scale: 1.06 },
-        { color: 'var(--text)', scale: 1, duration: 0.4, ease: 'power2.out' }
+        { color: 'var(--text-primary)', scale: 1, duration: 0.4, ease: 'power2.out' }
       );
     });
   }, [prices]);
 
   return (
     <div style={{
-      border: '1px solid var(--border-dim)',
+      border: '1px solid var(--border-subtle)',
       borderRadius: 4,
       overflow: 'hidden',
       marginBottom: 16,
@@ -136,8 +136,8 @@ export default function FeedStrip({ flrPriceOverride, lastTick }) {
         alignItems: 'center',
         gap: 8,
         padding: '7px 14px',
-        background: 'var(--mantle)',
-        borderBottom: '1px solid var(--border-dim)',
+        background: 'rgba(255, 255, 255, 0.02)',
+        borderBottom: '1px solid var(--border-subtle)',
         fontSize: 11,
         fontWeight: 700,
         letterSpacing: '0.08em',
@@ -147,28 +147,29 @@ export default function FeedStrip({ flrPriceOverride, lastTick }) {
         <span
           style={{
             display: 'inline-block', width: 7, height: 7,
-            borderRadius: '50%', background: 'var(--blue)',
+            borderRadius: '50%', background: 'var(--flare-blue)',
           }}
           className="pulse"
         />
         <span>FTSOv2 Live Feeds</span>
         <span style={{ flex: 1 }} />
-        <span style={{ fontSize: 10, color: 'var(--overlay0)', fontWeight: 400 }}>
+        <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 400 }}>
           ~1.8s block-latency · {FEEDS.length} feeds
           {lastTick ? ` · last tick ${secondsAgo}s ago` : ''}
         </span>
-        <span className="badge badge--blue" style={{ fontSize: 9, marginLeft: 8 }}>PUBLIC / ON-CHAIN</span>
+        <span className="badge badge--neutral" style={{ fontSize: 9, marginLeft: 8 }}>PUBLIC / ON-CHAIN</span>
       </div>
 
-      {/* Feeds row */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${FEEDS.length}, 1fr)` }}>
+      {/* Feeds grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
         {FEEDS.map((feed, i) => (
           <div
             key={feed.id}
             style={{
               padding: '12px 16px',
               background: feed.bgColor,
-              borderRight: i < FEEDS.length - 1 ? '1px solid var(--border-dim)' : 'none',
+              borderRight: i % 2 === 0 ? '1px solid var(--border-subtle)' : 'none',
+              borderBottom: i < 2 ? '1px solid var(--border-subtle)' : 'none',
               borderLeft: feed.primary ? `2px solid ${feed.color}` : 'none',
               position: 'relative',
             }}
@@ -198,14 +199,14 @@ export default function FeedStrip({ flrPriceOverride, lastTick }) {
                 fontFamily: 'var(--font-mono)',
                 fontSize: 18,
                 fontWeight: 800,
-                color: 'var(--text)',
+                color: 'var(--text-primary)',
                 letterSpacing: '-0.01em',
               }}
             >
               $<CountUp to={prices[i]} decimals={feed.decimals} />
             </div>
 
-            <div style={{ fontSize: 10, color: 'var(--overlay0)', marginTop: 4, fontFamily: 'var(--font-mono)' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontFamily: 'var(--font-mono)' }}>
               {feed.feedId.slice(0, 10)}…
             </div>
           </div>

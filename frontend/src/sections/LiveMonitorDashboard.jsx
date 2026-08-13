@@ -72,10 +72,10 @@ export default function LiveMonitorDashboard({
       {/* Oracle Feed Strip */}
       <FeedStrip flrPriceOverride={flrPrice} lastTick={lastTick} />
 
-      {/* 3-Column Monitor Grid */}
+      {/* Stacked Monitor layout for sidebar */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1.15fr 1fr',
+        display: 'flex',
+        flexDirection: 'column',
         gap: 20,
         marginTop: 20,
       }}>
