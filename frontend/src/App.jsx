@@ -8,7 +8,9 @@ import LiveMonitorDashboard       from './sections/LiveMonitorDashboard';
 import EventLog                   from './sections/EventLog';
 import ArchitectureStrip          from './sections/ArchitectureStrip';
 import SustainabilitySection      from './sections/SustainabilitySection';
+import NotFoundSection            from './sections/NotFoundSection';
 import TerminalProofBlock         from './components/TerminalProofBlock';
+import AppLoader                  from './components/AppLoader';
 import DynamicRepayCalculator     from './components/DynamicRepayCalculator';
 import ContractsVerificationPanel from './components/ContractsVerificationPanel';
 import AggregateStatsBar          from './components/AggregateStatsBar';
@@ -44,11 +46,12 @@ const mkLog = (text, type = 'info', extra = {}) => ({
 
 function getInitialView() {
   const path = window.location.pathname.toLowerCase();
+  if (path === '/' || path === '/index.html') return 'home';
   if (path.includes('/demo')) return 'demo';
   if (path.includes('/simulator')) return 'simulator';
   if (path.includes('/portfolio')) return 'portfolio';
   if (path.includes('/proofs')) return 'proofs';
-  return 'home';
+  return 'not-found';
 }
 
 export default function App() {
@@ -66,14 +69,50 @@ export default function App() {
   const [selectedAssetKey, setSelectedAssetKey] = useState('FLR');
   const activeAsset = ASSET_PROFILES[selectedAssetKey] || ASSET_PROFILES.FLR;
 
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [isAppReady, setIsAppReady] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const initializeApp = async () => {
+      // 1. Wait for heavy fonts (e.g., JetBrains Mono, Plus Jakarta Sans) to be completely ready
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
+      // 2. Ensure React has flushed its paints
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (isMounted) {
+            // Buffer to simulate core engine mount + prevent jarring flash if it loads too fast
+            setTimeout(() => setIsAppReady(true), 800);
+          }
+        });
+      });
+    };
+
+    if (document.readyState === 'complete') {
+      initializeApp();
+    } else {
+      window.addEventListener('load', initializeApp);
+      return () => window.removeEventListener('load', initializeApp);
+    }
+    return () => { isMounted = false; };
+  }, []);
+
   const navigate = useCallback((viewName) => {
     playClickSound();
-    setCurrentView(viewName);
-    const path = viewName === 'home' ? '/' : `/${viewName}`;
-    if (window.location.pathname !== path) {
-      window.history.pushState({ view: viewName }, '', path);
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsNavigating(true);
+    
+    // Artificial 600ms loader to simulate Enclave routing / hardware checks
+    setTimeout(() => {
+      setCurrentView(viewName);
+      const path = viewName === 'home' ? '/' : `/${viewName}`;
+      if (window.location.pathname !== path) {
+        window.history.pushState({ view: viewName }, '', path);
+      }
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      setIsNavigating(false);
+    }, 600);
   }, []);
 
   useEffect(() => {
@@ -441,7 +480,12 @@ export default function App() {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', position: 'relative' }}>
+    <div style={{ position: 'relative', minHeight: '100vh', overflowX: 'hidden' }}>
+      <AnimatePresence>
+        {!isAppReady && <AppLoader key="app-loader-init" message="Mounting UI & Fonts..." />}
+        {isAppReady && isNavigating && <AppLoader key="app-loader-nav" message="Attesting Enclave Hardware..." />}
+      </AnimatePresence>
+      
       {/* Background Timeline Axis */}
       <div className="timeline-grid-bg" />
       <div className="timeline-axis-line" />
@@ -719,16 +763,18 @@ export default function App() {
           </motion.div>
         )}
 
+        {/* ══════════════════════════════════════════════════════════════════════
+            DESTINATION 6: NOT FOUND ROUTE
+            ══════════════════════════════════════════════════════════════════════ */}
+        {currentView === 'not-found' && (
+          <NotFoundSection onGoHome={() => navigate('home')} />
+        )}
+
       </main>
 
       {/* Account Details & Vault Deposit Modal */}
       <WalletModal />
-
-      {/* TEE Remote Attestation Modal */}
-      <TeeAttestationModal
-        isOpen={isAttestationOpen}
-        onClose={() => setIsAttestationOpen(false)}
-      />
+      <TeeAttestationModal isOpen={isAttestationOpen} onClose={() => setIsAttestationOpen(false)} />
     </div>
   );
 }

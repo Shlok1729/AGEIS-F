@@ -9,8 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="background-color: #0A0A0F; margin: 0;">
+    <div id="root">
+      <!-- Raw CSS Bootloader before React Hydration -->
+      <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; color: #9BA3AF; letter-spacing: 0.1em; font-size: 12px; text-transform: uppercase;">
+        <div style="width: 48px; height: 48px; border: 2px solid rgba(155, 127, 255, 0.2); border-top-color: #9B7FFF; border-radius: 50%; animation: init-spin 1s linear infinite; margin-bottom: 24px;"></div>
+        Mounting Core Engine...
+        <style>
+          @keyframes init-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
