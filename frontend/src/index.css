@@ -55,6 +55,15 @@
   --radius-lg: 16px;
   --radius-xl: 22px;
   --radius-full: 9999px;
+  /* ── Spacing Scale ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 40px;
+  --space-7: 60px;
+  --space-8: 80px;
 }
 
 /* ── Global Reset ── */
@@ -143,16 +152,36 @@ pre {
   border-radius: var(--radius-lg);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
-.fintech-card:hover {
+.fintech-card--flat {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+
+.fintech-card--flat:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.fintech-card--actionable {
+  background: rgba(18, 18, 26, 0.8);
+}
+
+.fintech-card--actionable:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+.fintech-card--tee:hover {
   border-color: rgba(155, 127, 255, 0.25);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 30px var(--tech-purple-glow);
 }
 
-.fintech-card--active {
+.fintech-card--tee-active {
   border-color: var(--tech-purple-border);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 32px var(--tech-purple-glow);
 }
@@ -374,4 +403,163 @@ input[type="range"]::-webkit-slider-thumb:hover {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ── Mobile Navigation ── */
+.nav-links-desktop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.mobile-menu-dropdown {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background: rgba(10, 10, 15, 0.98);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 99;
+}
+
+.mobile-menu-dropdown .btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+@media (max-width: 900px) {
+  .nav-links-desktop {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+  .status-bar-container {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start !important;
+  }
+}
+
+/* ── Demo Two-Column Layout ── */
+.demo-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 32px;
+  align-items: start;
+}
+
+.demo-sticky-col {
+  position: sticky;
+  top: 140px; /* Leave room for NavBar (60) + StatusBar (approx 40) + margin */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* max-height to ensure EventLog can scroll if needed */
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+/* Hide scrollbar for the sticky column for cleaner look */
+.demo-sticky-col::-webkit-scrollbar {
+  width: 0px;
+}
+
+@media (max-width: 1100px) {
+  .demo-layout-grid {
+    grid-template-columns: 1fr;
+  }
+  .demo-sticky-col {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+/* ── Stepper Tab ── */
+.stepper-tab {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stepper-tab:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.stepper-tab--active {
+  background: rgba(155, 127, 255, 0.06);
+  border-color: var(--tech-purple);
+}
+
+.stepper-tab-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepper-tab-number {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepper-tab--active .stepper-tab-number {
+  background: var(--tech-purple);
+  color: #0A0A0F;
+}
+
+.stepper-tab--completed .stepper-tab-number {
+  background: var(--money-green);
+  color: #0A0A0F;
+}
+
+.stepper-tab-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stepper-tab--active .stepper-tab-title {
+  color: var(--tech-purple);
+}
+
+.stepper-tab--completed .stepper-tab-title {
+  color: var(--money-green);
+}
+
+.stepper-tab-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding-left: 26px;
 }

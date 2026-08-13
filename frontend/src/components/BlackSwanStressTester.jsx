@@ -40,17 +40,11 @@ export default function BlackSwanStressTester({ currentPrice, onTriggerScenario 
   };
 
   return (
-    <div style={{
-      background: 'rgba(255, 255, 255, 0.02)',
-      border: '1px solid rgba(255, 255, 255, 0.05)',
-      borderRadius: '14px',
-      padding: '20px',
-      marginBottom: 24,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="fintech-card" style={{ padding: 'var(--space-5)', marginBottom: 'var(--space-4)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
           <AlertTriangle size={15} style={{ color: 'var(--risk-red)' }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+          <span style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
             Historical "Black Swan" Market Stress Presets
           </span>
         </div>

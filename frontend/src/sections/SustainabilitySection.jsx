@@ -8,10 +8,11 @@ export default function SustainabilitySection() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="fintech-card"
+      className="fintech-card fintech-card--flat"
       style={{
-        padding: '28px',
-        marginBottom: 28,
+        padding: 'var(--space-5)',
+        margin: '0 auto',
+        maxWidth: 1080,
         background: 'rgba(18, 18, 26, 0.75)',
       }}
     >

@@ -51,16 +51,11 @@ export default function ContractsVerificationPanel() {
   ];
 
   return (
-    <div
-      className="fintech-card"
-      style={{
-        padding: '32px',
-        maxWidth: '1080px',
-        margin: '0 auto',
-        background: 'rgba(18, 18, 26, 0.75)',
-        border: '1px solid var(--border-card)',
-      }}
-    >
+    <div className="fintech-card fintech-card--flat" style={{
+      maxWidth: 900,
+      margin: '0 auto',
+      padding: 'var(--space-5)',
+    }}>
       {/* Section Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 16 }}>
         <div>
@@ -87,7 +82,7 @@ export default function ContractsVerificationPanel() {
           <span className="badge badge--green" style={{ fontSize: 11 }}>
             <span>13/13 Tests Passing</span>
           </span>
-          <span className="badge badge--purple" style={{ fontSize: 11 }}>
+          <span className="badge badge--neutral" style={{ fontSize: 11 }}>
             <Cpu size={12} />
             <span>FCC Enclave</span>
           </span>

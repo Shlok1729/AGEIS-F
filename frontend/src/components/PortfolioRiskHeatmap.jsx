@@ -60,22 +60,13 @@ export default function PortfolioRiskHeatmap({ onOpenPosition }) {
   };
 
   return (
-    <div
-      className="fintech-card"
-      style={{
-        padding: '28px',
-        maxWidth: '1080px',
-        margin: '0 auto',
-        background: 'rgba(18, 18, 26, 0.75)',
-        border: '1px solid var(--border-card)',
-      }}
-    >
+    <div className="fintech-card fintech-card--flat" style={{ padding: 'var(--space-5)', maxWidth: '1080px', margin: '0 auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 14 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <LayoutGrid size={16} style={{ color: 'var(--tech-purple)' }} />
-            <span className="badge badge--purple" style={{ fontSize: 10 }}>
+            <span className="badge badge--neutral" style={{ fontSize: 10 }}>
               Institutional Treasury Desk
             </span>
           </div>
@@ -147,35 +138,34 @@ export default function PortfolioRiskHeatmap({ onOpenPosition }) {
             style={{
               background: 'rgba(255, 255, 255, 0.02)',
               border: `1px solid ${pos.armed ? 'rgba(155, 127, 255, 0.18)' : 'rgba(244, 63, 94, 0.25)'}`,
-              borderRadius: '12px',
-              padding: '16px 18px',
+              borderRadius: 'var(--radius-md)',
+              padding: 'var(--space-4)',
               display: 'flex',
               flexDirection: 'column',
-              gap: 10,
+              gap: 'var(--space-4)',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
-                  {pos.id}
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                {pos.id}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-start' }}>
+                <span className={`badge ${pos.armed ? 'badge--green' : 'badge--red'}`} style={{ fontSize: 10 }}>
+                  {pos.armed ? 'Enclave Armed' : 'Unprotected'}
                 </span>
                 <span className="badge badge--neutral" style={{ fontSize: 10 }}>
                   {pos.pair}
                 </span>
               </div>
-
-              <span className={`badge ${pos.armed ? 'badge--green' : 'badge--red'}`} style={{ fontSize: 10 }}>
-                {pos.armed ? 'Enclave Armed' : 'Unprotected'}
-              </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 11 }}>
-              <div>
-                <span style={{ color: 'var(--text-muted)' }}>Collateral:</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)', fontSize: 11 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Collateral</span>
                 <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', fontWeight: 600 }}>{pos.collateral}</div>
               </div>
-              <div>
-                <span style={{ color: 'var(--text-muted)' }}>Debt Obligation:</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Debt Obligation</span>
                 <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', fontWeight: 600 }}>{pos.debt}</div>
               </div>
             </div>
@@ -184,8 +174,8 @@ export default function PortfolioRiskHeatmap({ onOpenPosition }) {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              paddingTop: 8,
-              borderTop: '1px solid rgba(255, 255, 255, 0.04)',
+              paddingTop: 'var(--space-4)',
+              borderTop: '1px solid var(--border-subtle)',
               fontSize: 11,
             }}>
               <div>

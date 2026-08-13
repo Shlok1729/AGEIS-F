@@ -48,7 +48,7 @@ export default function EventLog({ logs = [], mevSavings, onReset, onBackToMonit
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span className="badge badge--purple" style={{ fontSize: 9 }}>
+            <span className="badge badge--neutral" style={{ fontSize: 9 }}>
               FCC MODE=0 (Simulated Enclave)
             </span>
             <span style={{ color: 'var(--text-muted)', fontSize: 11, fontFamily: 'var(--font-mono)' }}>

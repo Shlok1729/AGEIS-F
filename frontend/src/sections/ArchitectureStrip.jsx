@@ -51,17 +51,17 @@ export default function ArchitectureStrip() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="fintech-card"
+      className="fintech-card fintech-card--flat"
       style={{
-        padding: '24px 28px',
-        marginBottom: 24,
-        background: 'rgba(18, 18, 26, 0.65)',
+        maxWidth: 1080,
+        margin: '0 auto',
+        padding: 'var(--space-6)',
       }}
     >
       {/* Titlebar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className="badge badge--purple" style={{ fontSize: 10 }}>
+          <span className="badge badge--neutral" style={{ fontSize: 10 }}>
             Confidential Architecture
           </span>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
