@@ -130,7 +130,7 @@ pre {
 
 /* ── Gradient Proof Accent Text ── */
 .gradient-text {
-  background: linear-gradient(135deg, #9B7FFF 0%, #E879F9 50%, #60A5FA 100%);
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--flare-blue) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline;
@@ -287,15 +287,15 @@ pre {
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, #9B7FFF 0%, #7C5CFC 100%);
-  color: #0A0A0F;
+  background: var(--text-primary);
+  color: var(--bg-base);
   font-weight: 700;
-  box-shadow: 0 4px 16px var(--tech-purple-glow);
+  box-shadow: 0 4px 16px rgba(245, 243, 247, 0.15);
 }
 
 .btn--primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(155, 127, 255, 0.35);
+  box-shadow: 0 6px 24px rgba(245, 243, 247, 0.25);
 }
 
 .btn--surface {
@@ -340,8 +340,8 @@ select {
 input[type="number"]:focus,
 input[type="text"]:focus,
 select:focus {
-  border-color: var(--tech-purple);
-  box-shadow: 0 0 0 2px var(--tech-purple-glow);
+  border-color: var(--flare-blue);
+  box-shadow: 0 0 0 2px var(--flare-blue-glow);
 }
 
 /* ── Sliders ── */
@@ -362,10 +362,10 @@ input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--tech-purple);
+  background: var(--flare-blue);
   border: 2px solid #0A0A0F;
   cursor: pointer;
-  box-shadow: 0 0 10px var(--tech-purple-glow);
+  box-shadow: 0 0 10px var(--flare-blue-glow);
   transition: transform 0.15s ease;
 }
 
