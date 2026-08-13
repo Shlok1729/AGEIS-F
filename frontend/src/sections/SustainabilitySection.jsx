@@ -10,7 +10,7 @@ export default function SustainabilitySection() {
       transition={{ duration: 0.4 }}
       className="fintech-card fintech-card--flat"
       style={{
-        padding: '32px',
+        padding: 'var(--space-5)',
         margin: '0 auto',
         maxWidth: 1080,
         background: 'rgba(18, 18, 26, 0.75)',

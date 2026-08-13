@@ -60,7 +60,7 @@ export default function PortfolioRiskHeatmap({ onOpenPosition }) {
   };
 
   return (
-    <div className="fintech-card fintech-card--flat" style={{ padding: '32px', maxWidth: '1080px', margin: '0 auto' }}>
+    <div className="fintech-card fintech-card--flat" style={{ padding: 'var(--space-5)', maxWidth: '1080px', margin: '0 auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 14 }}>
         <div>
@@ -145,8 +145,8 @@ export default function PortfolioRiskHeatmap({ onOpenPosition }) {
               gap: 10,
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
                   {pos.id}
                 </span>

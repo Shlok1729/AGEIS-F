@@ -55,7 +55,7 @@ export default function ArchitectureStrip() {
       style={{
         maxWidth: 1080,
         margin: '0 auto',
-        padding: '40px',
+        padding: 'var(--space-6)',
       }}
     >
       {/* Titlebar */}

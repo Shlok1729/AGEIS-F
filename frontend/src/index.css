@@ -55,6 +55,15 @@
   --radius-lg: 16px;
   --radius-xl: 22px;
   --radius-full: 9999px;
+  /* ── Spacing Scale ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 40px;
+  --space-7: 60px;
+  --space-8: 80px;
 }
 
 /* ── Global Reset ── */
@@ -479,4 +488,78 @@ input[type="range"]::-webkit-slider-thumb:hover {
     max-height: none;
     overflow-y: visible;
   }
+}
+
+/* ── Stepper Tab ── */
+.stepper-tab {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stepper-tab:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.stepper-tab--active {
+  background: rgba(155, 127, 255, 0.06);
+  border-color: var(--tech-purple);
+}
+
+.stepper-tab-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepper-tab-number {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepper-tab--active .stepper-tab-number {
+  background: var(--tech-purple);
+  color: #0A0A0F;
+}
+
+.stepper-tab--completed .stepper-tab-number {
+  background: var(--money-green);
+  color: #0A0A0F;
+}
+
+.stepper-tab-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stepper-tab--active .stepper-tab-title {
+  color: var(--tech-purple);
+}
+
+.stepper-tab--completed .stepper-tab-title {
+  color: var(--money-green);
+}
+
+.stepper-tab-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding-left: 26px;
 }

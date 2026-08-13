@@ -54,7 +54,7 @@ export default function ContractsVerificationPanel() {
     <div className="fintech-card fintech-card--flat" style={{
       maxWidth: 900,
       margin: '0 auto',
-      padding: '32px',
+      padding: 'var(--space-5)',
     }}>
       {/* Section Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 16 }}>

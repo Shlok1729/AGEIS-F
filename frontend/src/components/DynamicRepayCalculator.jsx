@@ -29,7 +29,7 @@ export default function DynamicRepayCalculator({ liveFlrPrice = 0.035, onEnterDe
     <div
       className="fintech-card fintech-card--flat"
       style={{
-        padding: '32px',
+        padding: 'var(--space-5)',
         maxWidth: '800px',
         margin: '0 auto',
         background: 'rgba(18, 18, 26, 0.75)',
@@ -191,13 +191,13 @@ export default function DynamicRepayCalculator({ liveFlrPrice = 0.035, onEnterDe
         </div>
 
         {/* Output 3: Liquidation Penalty Avoided */}
-        <div style={{
-          background: 'rgba(46, 212, 122, 0.04)',
-          border: '1px solid rgba(46, 212, 122, 0.2)',
-          borderRadius: '14px',
-          padding: '18px',
-        }}>
-          <span style={{ fontSize: 11, color: 'var(--money-green)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: 6 }}>
+          <div style={{
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--space-3)',
+            marginTop: 'var(--space-3)'
+          }}><span style={{ fontSize: 11, color: 'var(--money-green)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: 6 }}>
             MEV Liquidation Fee Saved
           </span>
           <div style={{

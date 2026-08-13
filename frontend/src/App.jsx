@@ -17,7 +17,8 @@ import WalletButton               from './components/WalletButton';
 import WalletModal                from './components/WalletModal';
 import TeeAttestationModal        from './components/TeeAttestationModal';
 import PredatorRaceVisualizer     from './components/PredatorRaceVisualizer';
-import AssetSelector, { ASSET_PROFILES } from './components/AssetSelector';
+import { ASSET_PROFILES } from './components/AssetSelector';
+import SharedAssetHeader from './components/SharedAssetHeader';
 import BlackSwanStressTester      from './components/BlackSwanStressTester';
 import PortfolioRiskHeatmap       from './components/PortfolioRiskHeatmap';
 import CountUp                    from './components/CountUp';
@@ -280,7 +281,7 @@ export default function App() {
               setIsAttestationOpen(true);
             }}
             style={{ 
-              fontSize: 10, padding: '3px 8px', borderRadius: '6px', gap: 4, 
+              fontSize: 10, padding: '3px var(--space-2)', borderRadius: 'var(--radius-sm)', gap: 'var(--space-1)',
               display: 'flex', alignItems: 'center', background: 'var(--bg-elevated)',
               border: '1px solid var(--border-card)', color: 'var(--text-primary)',
               cursor: 'pointer'
@@ -447,7 +448,7 @@ export default function App() {
 
       <NavBar />
 
-      <main style={{ maxWidth: 1180, margin: '0 auto', padding: '0 24px 80px', position: 'relative', zIndex: 1 }}>
+      <main style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--space-4) var(--space-8)', position: 'relative', zIndex: 1 }}>
 
         {/* ══════════════════════════════════════════════════════════════════════
             DESTINATION 1: HOME (FOCUSED, CLEAN OVERVIEW)
@@ -475,8 +476,8 @@ export default function App() {
               marginBottom: 80,
               background: 'rgba(255, 255, 255, 0.015)',
               border: '1px solid var(--border-subtle)',
-              borderRadius: '24px',
-              padding: '60px 40px'
+              borderRadius: 'var(--radius-xl)',
+              padding: 'var(--space-7) var(--space-6)'
             }}>
               <div style={{ textAlign: 'center', marginBottom: 32 }}>
                 <span className="badge badge--purple" style={{ fontSize: 10, marginBottom: 12 }}>
@@ -493,12 +494,12 @@ export default function App() {
             <div style={{
               background: 'rgba(155, 127, 255, 0.04)',
               border: '1px solid rgba(155, 127, 255, 0.18)',
-              borderRadius: '16px',
-              padding: '40px',
+              borderRadius: 'var(--radius-lg)',
+              padding: 'var(--space-6)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: 24,
+              gap: 'var(--space-4)',
               flexWrap: 'wrap',
             }}>
               <div>
@@ -545,12 +546,10 @@ export default function App() {
             </div>
 
             {/* Asset Selector */}
-            <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-              <AssetSelector
-                selectedAsset={selectedAssetKey}
-                onSelectAsset={handleSelectAsset}
-              />
-            </div>
+            <SharedAssetHeader
+              selectedAsset={selectedAssetKey}
+              onSelectAsset={handleSelectAsset}
+            />
 
             {/* Step Navigation Tabs */}
             <div style={{
@@ -579,7 +578,7 @@ export default function App() {
 
             <div className="demo-layout-grid">
               {/* ── Left Column (Control) ── */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                 {/* Step 1: Position Setup Panel */}
                 {demoStep === 1 && (
                   <PositionSetupPanel
@@ -642,12 +641,10 @@ export default function App() {
               </h2>
             </div>
 
-            <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'center' }}>
-              <AssetSelector
-                selectedAsset={selectedAssetKey}
-                onSelectAsset={handleSelectAsset}
-              />
-            </div>
+            <SharedAssetHeader
+              selectedAsset={selectedAssetKey}
+              onSelectAsset={handleSelectAsset}
+            />
 
             <DynamicRepayCalculator
               liveFlrPrice={flrPrice}
@@ -675,7 +672,7 @@ export default function App() {
             transition={{ duration: 0.3 }}
             style={{ padding: '24px 0' }}
           >
-            <div style={{ padding: '40px 0', textAlign: 'center' }}>
+            <div style={{ padding: 'var(--space-6) 0', textAlign: 'center' }}>
             <span className="badge badge--neutral" style={{ fontSize: 10, marginBottom: 8 }}>
               Institutional Monitoring Desk
             </span>
@@ -737,44 +734,17 @@ function StepperTab({ stepNumber, title, subtitle, active, completed, onClick })
     <button
       type="button"
       onClick={onClick}
-      style={{
-        background: active ? 'rgba(155, 127, 255, 0.06)' : 'rgba(255, 255, 255, 0.02)',
-        border: `1px solid ${active ? 'var(--tech-purple)' : 'rgba(255, 255, 255, 0.06)'}`,
-        borderRadius: '12px',
-        padding: '14px 18px',
-        textAlign: 'left',
-        cursor: 'pointer',
-        backdropFilter: 'var(--glass-blur)',
-        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 4,
-      }}
+      className={`stepper-tab ${active ? 'stepper-tab--active' : ''} ${completed ? 'stepper-tab--completed' : ''}`}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{
-          fontSize: 10,
-          fontWeight: 700,
-          background: active ? 'var(--tech-purple)' : completed ? 'var(--money-green)' : 'rgba(255, 255, 255, 0.08)',
-          color: active || completed ? '#0A0A0F' : 'var(--text-primary)',
-          width: 18,
-          height: 18,
-          borderRadius: '50%',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
+      <div className="stepper-tab-header">
+        <span className="stepper-tab-number">
           {completed && !active ? '✓' : stepNumber}
         </span>
-        <span style={{
-          fontSize: 13,
-          fontWeight: 700,
-          color: active ? 'var(--tech-purple)' : completed ? 'var(--money-green)' : 'var(--text-primary)',
-        }}>
+        <span className="stepper-tab-title">
           {title}
         </span>
       </div>
-      <div style={{ fontSize: 11, color: 'var(--text-secondary)', paddingLeft: 26 }}>
+      <div className="stepper-tab-subtitle">
         {subtitle}
       </div>
     </button>

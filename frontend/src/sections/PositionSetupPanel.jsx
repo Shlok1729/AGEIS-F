@@ -40,8 +40,8 @@ export default function PositionSetupPanel({ config, onChange, onRegister, isArm
       transition={{ duration: 0.3 }}
       className="fintech-card fintech-card--actionable"
       style={{
-        padding: '32px',
-        marginBottom: 20,
+        padding: 'var(--space-5)',
+        marginBottom: 'var(--space-4)',
       }}
     >
       {/* Borrower Identity Bar */}
