@@ -32,7 +32,7 @@ export default function EventLog({ logs = [], mevSavings, onReset, onBackToMonit
 
       {/* Terminal Log Panel with 3-dot window chrome */}
       <div className="terminal-window">
-        <div className="terminal-header">
+        <div className="terminal-header" style={{ flexWrap: 'wrap', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div className="terminal-dots">
               <span className="terminal-dot terminal-dot--red" />

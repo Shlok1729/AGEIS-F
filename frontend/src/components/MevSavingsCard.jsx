@@ -49,29 +49,26 @@ export default function MevSavingsCard({ debtUsdAtTrigger, repaidUsd, visible })
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)' }} />
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>
-                  Liquidation prevented
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--overlay1)', marginTop: 2 }}>
-                  TEE protection triggered silently before public bots could act
-                </div>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--money-green)' }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--money-green)' }}>
+                Liquidation prevented
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                TEE protection triggered silently before public bots could act
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--green)', fontFamily: 'var(--font-mono)', letterSpacing: '-0.02em' }}>
-                +${mevSaving.toFixed(4)}
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--overlay1)', marginTop: 2 }}>gross collateral saved</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--money-green)', fontFamily: 'var(--font-mono)', letterSpacing: '-0.02em' }}>
+              +${mevSaving.toFixed(4)}
             </div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>gross collateral saved</div>
+          </div>
           </div>
 
           {/* Breakdown grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr 1fr',
-            gap: 12,
+          <div className="grid-responsive-4" style={{
             padding: '12px 0',
             borderTop: '1px solid rgba(255,255,255,0.05)',
             borderBottom: '1px solid rgba(255,255,255,0.05)',

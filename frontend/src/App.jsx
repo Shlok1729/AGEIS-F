@@ -585,12 +585,7 @@ export default function App() {
             />
 
             {/* Step Navigation Tabs */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: 16,
-              marginBottom: 24,
-            }}>
+            <div className="grid-responsive-2" style={{ marginBottom: 24 }}>
               <StepperTab
                 stepNumber={1}
                 title="Configure Position & Arm TEE"

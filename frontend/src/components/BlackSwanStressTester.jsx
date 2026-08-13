@@ -53,7 +53,7 @@ export default function BlackSwanStressTester({ currentPrice, onTriggerScenario 
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div className="grid-responsive-3">
         {scenarios.map((sc) => (
           <button
             key={sc.id}

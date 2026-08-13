@@ -59,7 +59,7 @@ export default function ArchitectureStrip() {
       }}
     >
       {/* Titlebar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="badge badge--neutral" style={{ fontSize: 10 }}>
             Confidential Architecture
@@ -82,12 +82,7 @@ export default function ArchitectureStrip() {
       </div>
 
       {/* Pipeline Steps Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: 16,
-        position: 'relative',
-      }}>
+      <div className="grid-responsive-5" style={{ position: 'relative' }}>
         {STEPS.map((step, i) => {
           const IconComp = step.icon;
           return (

@@ -57,7 +57,7 @@ export default function ContractsVerificationPanel() {
       padding: 'var(--space-5)',
     }}>
       {/* Section Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.06)', paddingBottom: 16 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span className="badge badge--green" style={{ fontSize: 10 }}>
@@ -110,7 +110,7 @@ export default function ContractsVerificationPanel() {
             onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)'}
           >
             {/* Contract Info */}
-            <div style={{ minWidth: '260px' }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
                   {c.name}
@@ -125,7 +125,7 @@ export default function ContractsVerificationPanel() {
             </div>
 
             {/* Address & Actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', maxWidth: '100%' }}>
               <span style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: 12,
@@ -136,7 +136,7 @@ export default function ContractsVerificationPanel() {
                 border: '1px solid rgba(255, 255, 255, 0.04)',
                 maxWidth: '100%',
                 overflowX: 'auto',
-                whiteSpace: 'nowrap',
+                wordBreak: 'break-all',
               }}>
                 {c.address}
               </span>
