@@ -480,7 +480,7 @@ export default function App() {
   );
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', position: 'relative' }}>
       <AnimatePresence>
         {!isAppReady && <AppLoader key="app-loader-init" message="Mounting UI & Fonts..." />}
         {isAppReady && isNavigating && <AppLoader key="app-loader-nav" message="Attesting Enclave Hardware..." />}
