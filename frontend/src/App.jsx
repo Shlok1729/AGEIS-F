@@ -345,20 +345,7 @@ export default function App() {
         </div>
       </div>
 
-      <header style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        background: 'rgba(10, 10, 15, 0.82)',
-        backdropFilter: 'blur(24px) saturate(160%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(160%)',
-        borderBottom: '1px solid var(--border-subtle)',
-        padding: '0 32px',
-        height: 60,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
+      <header className="app-header">
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <span
