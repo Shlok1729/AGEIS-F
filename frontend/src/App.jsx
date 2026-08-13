@@ -11,6 +11,7 @@ import SustainabilitySection      from './sections/SustainabilitySection';
 import NotFoundSection            from './sections/NotFoundSection';
 import TerminalProofBlock         from './components/TerminalProofBlock';
 import AppLoader                  from './components/AppLoader';
+import CustomCursor               from './components/CustomCursor';
 import DynamicRepayCalculator     from './components/DynamicRepayCalculator';
 import ContractsVerificationPanel from './components/ContractsVerificationPanel';
 import AggregateStatsBar          from './components/AggregateStatsBar';
@@ -481,6 +482,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-base)', position: 'relative' }}>
+      <CustomCursor />
       <AnimatePresence>
         {!isAppReady && <AppLoader key="app-loader-init" message="Mounting UI & Fonts..." />}
         {isAppReady && isNavigating && <AppLoader key="app-loader-nav" message="Attesting Enclave Hardware..." />}
